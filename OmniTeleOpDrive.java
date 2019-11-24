@@ -17,7 +17,7 @@ import static java.lang.Math.toDegrees;
 
 @TeleOp(name="Omni: TeleOpDrive", group ="TeleOp")
 public class OmniTeleOpDrive extends OpMode {
-    public HardwareOmnibotDrive robot = new HardwareOmnibotDrive();
+    public HardwareBase robot = new HardwareBase();
 
     @Override
     public void init() {
@@ -77,6 +77,8 @@ public class OmniTeleOpDrive extends OpMode {
             yPower = 0.0;
             spin = 0.0;
         }
+
+        bumpPressed = gamepad1.right_bumper;
 
         if(bumpPressed && !bumpHeld) {
             bumpHeld = true;
