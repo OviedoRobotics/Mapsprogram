@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.Mapsprogram;
 
-import android.graphics.Color;
+
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -17,7 +17,7 @@ import static java.lang.Math.toDegrees;
 
 @TeleOp(name="Omni: TeleOpDrive", group ="TeleOp")
 public class OmniTeleOpDrive extends OpMode {
-    public HardwareBase robot = new HardwareBase();
+    public HardwareOmnibotDrive robot = new HardwareOmnibotDrive();
 
     @Override
     public void init() {
