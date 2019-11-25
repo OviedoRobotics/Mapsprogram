@@ -151,10 +151,10 @@ public class HardwareOmnibotDrive
      */
     public void drive(double xPower, double yPower, double spin, double angleOffset) {
         double gyroAngle = readIMU() + angleOffset;
-        double leftFrontAngle = toRadians(45.0 + gyroAngle);
-        double rightFrontAngle = toRadians(-45.0 + gyroAngle);
-        double leftRearAngle = toRadians(135.0 + gyroAngle);
-        double rightRearAngle = toRadians(-135.0 + gyroAngle);
+        double leftFrontAngle = toRadians(135.0 + gyroAngle); // previous value 45
+        double rightFrontAngle = toRadians(45.0 + gyroAngle); // previous value -45
+        double leftRearAngle = toRadians(225.0 + gyroAngle); // previous value 135
+        double rightRearAngle = toRadians(-45.0 + gyroAngle); // previous value -135
         double joystickMagnitude = sqrt(xPower*xPower + yPower*yPower);
         double joystickAngle = atan2(yPower, xPower);
         double newPower = driverInputShaping(joystickMagnitude);
