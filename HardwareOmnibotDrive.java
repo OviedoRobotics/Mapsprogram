@@ -285,7 +285,7 @@ public class HardwareOmnibotDrive
         frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rearLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rearRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        resetDriveEncoders();
+        //resetDriveEncoders();
 
         initIMU();
     }
