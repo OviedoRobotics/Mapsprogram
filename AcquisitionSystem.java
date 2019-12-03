@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.util.Range;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+@TeleOp
 public class AcquisitionSystem extends OpMode{
 
     /* Declare OpMode members. */

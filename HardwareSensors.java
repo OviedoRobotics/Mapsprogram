@@ -13,8 +13,6 @@ public class HardwareSensors
     // Strings for config
     public final static String HOOK_1 = "h1";
     public final static String HOOK_2 = "h2";
-    public final static String REAR_LEFT_MOTOR = "l2";
-    public final static String REAR_RIGHT_MOTOR = "r2";
     public final static String ACQU1 = "a1";
     public final static String ACQU2 = "a2";
     public final static String ARM = "arm";
@@ -41,6 +39,10 @@ public class HardwareSensors
 
     }
 
+    public void withEncoders(){
+        acq1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        acq1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
 
 
     /* Initialize standard Hardware interfaces */
