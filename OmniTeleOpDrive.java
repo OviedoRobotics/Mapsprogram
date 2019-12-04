@@ -18,6 +18,7 @@ import static java.lang.Math.toDegrees;
 @TeleOp(name="Omni: TeleOpDrive", group ="TeleOp")
 public class OmniTeleOpDrive extends OpMode {
     public HardwareOmnibotDrive robot = new HardwareOmnibotDrive();
+    public HardwareSensors onbot = new HardwareSensors();
 
     @Override
     public void init() {

@@ -41,9 +41,13 @@ public class HardwareSensors
 
     public void withEncoders(){
         acq1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        acq1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        acq2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
+    public void resetEncoders() {
+        acq1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        acq2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    }
 
     /* Initialize standard Hardware interfaces */
     public void init(HardwareMap ahwMap) {
@@ -61,6 +65,8 @@ public class HardwareSensors
 
         acq1.setDirection(DcMotor.Direction.FORWARD);
         acq2.setDirection(DcMotor.Direction.FORWARD);
+        withEncoders();
+        resetEncoders();
     }
 
 

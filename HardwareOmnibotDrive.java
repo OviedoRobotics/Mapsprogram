@@ -19,7 +19,7 @@ import static java.lang.Math.sqrt;
 import static java.lang.Math.toRadians;
 
 /**
- *Created by 12090 STEM Punk
+ *Created by STEM Punk and MAPS
  */
 public class HardwareOmnibotDrive
 {
