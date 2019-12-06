@@ -4,6 +4,8 @@ package org.firstinspires.ftc.teamcode.Mapsprogram;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
@@ -19,6 +21,21 @@ import static java.lang.Math.toDegrees;
 public class OmniTeleOpDrive extends OpMode {
     public HardwareOmnibotDrive robot = new HardwareOmnibotDrive();
     public HardwareSensors onbot = new HardwareSensors();
+    static final double INCREMENT   = 0.01;     // amount to slew servo each CYCLE_MS cycle
+    static final int    HEIGHT_INCREMENT = 3100;
+    static final int    SPIN_INCREMENT = 200;
+    static final double LIFT_SPEED = 1.0;
+    static final double OPEN    =  0.8;     // Maximum rotational position
+    static final double CLOSE   =  0.6;     // Minimum rotational position
+    static final double UNHOOK    =  1.0;     // Maximum rotational position
+    static final double HOOK   =  0.0;     // Minimum rotational position
+    double  position2 = (UNHOOK - HOOK) / 2; // Start at halfway position
+    double position3 = (UNHOOK - HOOK) / 2;
+    double  position = (OPEN + CLOSE) / 2; // Start at halfway position
+    boolean x2Pressed = false;
+    boolean x2Held = false;
+    boolean y2Pressed = false;
+    boolean y2Held = false;
 
     @Override
     public void init() {
@@ -104,5 +121,101 @@ public class OmniTeleOpDrive extends OpMode {
         telemetry.addData("Offset Angle: ", driverAngle);
         telemetry.addData("Gyro Angle: ", gyroAngle);
         updateTelemetry(telemetry);
+
+
+        x2Pressed = gamepad2.x;
+        // If x2 was pressed, but not held
+        if(x2Pressed && !x2Held) {
+            x2Held = true;
+            int newHeight = onbot.acq2.getCurrentPosition();
+
+            newHeight += HEIGHT_INCREMENT;
+
+            onbot.acq2.setTargetPosition(newHeight);
+            onbot.acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            onbot.acq2.setPower(LIFT_SPEED);
+
+
+        } else if(!x2Pressed) {
+            // This happens if the button is not being pressed at all, which resets that
+            // we are holding it so the next time it is pressed it will trigger the action
+            // again.
+            x2Held = false;
+        }
+
+
+        y2Pressed = gamepad2.y;
+
+        if(y2Pressed && !y2Held) {
+            int newHeight = onbot.acq2.getCurrentPosition();
+            if( newHeight > 5 ) {
+                newHeight -= HEIGHT_INCREMENT;
+
+                onbot.acq2.setTargetPosition(0);
+                onbot.acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                onbot.acq2.setPower(LIFT_SPEED);
+            }
+            else if(newHeight <= 5) {
+                onbot.acq2.setTargetPosition(newHeight);
+                onbot.acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                onbot.acq2.setPower(0);
+            }
+        } else if(!y2Pressed) {
+            y2Held = false;
+        }
+
+        telemetry.addData("Current Position of Rotation", + onbot.acq2.getCurrentPosition());
+        boolean turn = false;
+
+        onbot.acq1.setPower(gamepad2.left_stick_x);
+
+        if(onbot.acq2.getCurrentPosition() > 2000 ) {
+            turn = !turn;
+        }
+
+
+        telemetry.addData("Current Position of Extension", + onbot.acq1.getCurrentPosition() );
+        telemetry.update();
+
+        // Open the acquistion system
+        if(gamepad2.left_bumper  ) {
+            // Keep stepping up until we hit the max value.
+            position += INCREMENT ;
+            if (position >= OPEN ) {
+                position = OPEN;
+            }
+        }
+        // secure the block
+        else if(gamepad2.right_bumper ){
+            // Keep stepping down until we hit the min value.
+            position -= INCREMENT ;
+            if (position <= CLOSE ) {
+                position = CLOSE;
+
+            }
+        }
+
+        onbot.arm.setPosition(position);
+
+        // ///////////////////////////////////////////////////////////////////
+        // ////                                                           ////
+        // ////                Foundation Hooks program                   ////
+        // ////                                                           ////
+        // ///////////////////////////////////////////////////////////////////
+
+        // Open the acquistion system
+        if (gamepad2.b) {
+            position2 = UNHOOK;
+            position3 = HOOK;
+        }
+        // secure the block
+        else if(gamepad2.a ){
+            position2 = 0.5;
+            position3 = 0.5;
+        }
+
+        onbot.hook1.setPosition(position2);
+        onbot.hook2.setPosition(position3);
     }
 }

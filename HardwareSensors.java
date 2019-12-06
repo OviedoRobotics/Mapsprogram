@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Mapsprogram;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -30,12 +31,19 @@ public class HardwareSensors
     public DistanceSensor sensorRange; // Sense distance from stone
     public DistanceSensor sensorRange2; // Confirm distance from stone
 
+    // Variables
+    private
+
     /* local OpMode members. */
     HardwareMap hwMap           =  null;
     private ElapsedTime period  = new ElapsedTime();
 
     /* Constructor */
     public HardwareSensors(){
+
+    }
+
+    public void extentsion() {
 
     }
 
@@ -64,7 +72,7 @@ public class HardwareSensors
         arm = hwMap.get(Servo.class, ARM);
 
         acq1.setDirection(DcMotor.Direction.FORWARD);
-        acq2.setDirection(DcMotor.Direction.FORWARD);
+        acq2.setDirection(DcMotor.Direction.REVERSE);
         withEncoders();
         resetEncoders();
     }
