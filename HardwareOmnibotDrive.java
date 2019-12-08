@@ -249,10 +249,10 @@ public class HardwareOmnibotDrive
             encoderCount = frontLeft.getCurrentPosition();
         }
 
-        frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rearLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rearRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rearLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rearRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         // Set the stop mode
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);

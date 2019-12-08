@@ -17,8 +17,9 @@ public class AcquisitionSystem extends OpMode{
     HardwareSensors onbot = new HardwareSensors();
     private ElapsedTime runtime = new ElapsedTime();
     static final double INCREMENT   = 0.01;     // amount to slew servo each CYCLE_MS cycle
+    static final int    DENEST = 3200;
     static final int    HEIGHT_INCREMENT = 3100;
-    static final int    SPIN_INCREMENT = 200;
+    static final int    SPIN = 200;
     static final double LIFT_SPEED = 1.0;
     static final double OPEN    =  0.8;     // Maximum rotational position
     static final double CLOSE   =  0.6;     // Minimum rotational position
@@ -29,6 +30,7 @@ public class AcquisitionSystem extends OpMode{
     double  position = (OPEN + CLOSE) / 2; // Start at halfway position
     boolean x2Pressed = false;
     boolean x2Held = false;
+    boolean nest = true;
     boolean y2Pressed = false;
     boolean y2Held = false;
 
@@ -69,21 +71,16 @@ public class AcquisitionSystem extends OpMode{
 
         x2Pressed = gamepad2.x;
         // If x2 was pressed, but not held
-        if(x2Pressed && !x2Held) {
-//            x2Held = true;
-//            int newHeight = onbot.acq2.getCurrentPosition();
-//
-//            newHeight += HEIGHT_INCREMENT;
-//
-//            onbot.acq2.setTargetPosition(newHeight);
-//            onbot.acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//
-//            onbot.acq2.setPower(LIFT_SPEED);
-//
-            int newTurn = onbot.acq2.getCurrentPosition();
+        if(x2Pressed && !x2Held && nest) {
+            x2Held = true;
+            nest = false;
 
-            newTurn += SPIN_INCREMENT;
-            onbot.acq1.setTargetPosition(newTurn);
+            onbot.acq2.setTargetPosition(DENEST);
+            onbot.acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            onbot.acq2.setPower(LIFT_SPEED);
+
+            onbot.acq1.setTargetPosition(SPIN);
             onbot.acq1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
             onbot.acq1.setPower(LIFT_SPEED);
@@ -99,47 +96,36 @@ public class AcquisitionSystem extends OpMode{
 
         y2Pressed = gamepad2.y;
 
-        if(y2Pressed && !y2Held) {
-            int newHeight = onbot.acq2.getCurrentPosition();
-            if( newHeight > 5 ) {
-                newHeight -= HEIGHT_INCREMENT;
+        if(y2Pressed && !y2Held && !nest ) {
+            y2Held = true;
+            nest = false;
 
-                onbot.acq2.setTargetPosition(0);
-                onbot.acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                onbot.acq2.setPower(LIFT_SPEED);
-            }
-            else if(newHeight <= 5) {
-                onbot.acq2.setTargetPosition(newHeight);
-                onbot.acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                onbot.acq2.setPower(0);
-            }
+            onbot.acq2.setTargetPosition(0);
+            onbot.acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            onbot.acq2.setPower(LIFT_SPEED);
+
+            onbot.acq1.setTargetPosition(0);
+            onbot.acq1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            onbot.acq1.setPower(LIFT_SPEED);
+
         } else if(!y2Pressed) {
             y2Held = false;
+        }
+
+        if( !nest ) {
+         while( onbot.acq2.getCurrentPosition() > 0) {
+             onbot.acq2.setPower(gamepad2.right_stick_y);
+         }
+            onbot.acq2.setPower(0);
         }
 
         telemetry.addData("Current Position of Rotation", + onbot.acq2.getCurrentPosition());
         boolean turn = false;
 
-        onbot.acq1.setPower(gamepad2.left_stick_x);
 
-        if(onbot.acq2.getCurrentPosition() > 2000 ) {
-            turn = !turn;
-        }
 
-        if( Math.abs(gamepad2.left_stick_x) > 0.02 && turn) {
-            if(gamepad2.left_stick_x > 0.02){
-                onbot.acq1.setTargetPosition(2000);
-                onbot.acq1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                onbot.acq1.setPower(1);
-            } else if(gamepad2.left_stick_x < 0.02){
-                onbot.acq1.setTargetPosition(100);
-                onbot.acq1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                onbot.acq1.setPower(1);
-            } else if( Math.abs(gamepad2.left_stick_x) > 0.02 && !turn )
-                onbot.acq1.setTargetPosition(100);
-            onbot.acq1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            onbot.acq1.setPower(1);
-        }
 
         telemetry.addData("Current Position of Extension", + onbot.acq1.getCurrentPosition() );
         telemetry.update();

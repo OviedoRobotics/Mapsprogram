@@ -43,8 +43,12 @@ public class HardwareSensors
 
     }
 
-    public void extentsion() {
+    public int extentsion(int heightIn) {
+        return heightIn*1000;
+    }
 
+    public int spin(int degrees) {
+        return degrees * 1000;
     }
 
     public void withEncoders(){
@@ -71,7 +75,7 @@ public class HardwareSensors
         hook2 = hwMap.get(Servo.class, HOOK_2);
         arm = hwMap.get(Servo.class, ARM);
 
-        acq1.setDirection(DcMotor.Direction.FORWARD);
+        acq1.setDirection(DcMotor.Direction.REVERSE);
         acq2.setDirection(DcMotor.Direction.REVERSE);
         withEncoders();
         resetEncoders();
