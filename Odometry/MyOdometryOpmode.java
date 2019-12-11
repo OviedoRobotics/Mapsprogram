@@ -87,18 +87,28 @@ public class MyOdometryOpmode extends LinearOpMode {
 
             double pivotCorrection = desiredRobotOrientation - globalPositionUpdate.returnOrientation();
 
-            right_front.setPower(-robot_movement_x_component - robot_movement_y_component );//robot_movement_x_component + robot_movement_y_component + pivotCorrection);
-            right_back.setPower(robot_movement_y_component - robot_movement_x_component);//robot_movement_x_component - robot_movement_y_component  + pivotCorrection);
-            left_front.setPower(robot_movement_x_component + robot_movement_y_component);//pivotCorrection - robot_movement_x_component - robot_movement_y_component );
-            left_back.setPower(robot_movement_x_component - robot_movement_y_component);//robot_movement_y_component - robot_movement_x_component + pivotCorrection);
+            double rf = -robot_movement_x_component - robot_movement_y_component;
+            double rb = robot_movement_y_component - robot_movement_x_component;
+            double lf = robot_movement_x_component + robot_movement_y_component;
+            double lb = robot_movement_x_component - robot_movement_y_component;
 
-            telemetry.addData("X Position", globalPositionUpdate.returnXCoordinate() / COUNTS_PER_INCH);
-            telemetry.addData("Y Position", globalPositionUpdate.returnYCoordinate() / COUNTS_PER_INCH);
-            telemetry.addData("Orientation (Degrees)", globalPositionUpdate.returnOrientation());
+//            right_front.setPower(rf);
+//            right_back.setPower(rb);
+//            left_front.setPower(lf);
+//            left_back.setPower(lb);
 
-            telemetry.addData("Vertical left encoder position", verticalLeft.getCurrentPosition());
-            telemetry.addData("Vertical right encoder position", verticalRight.getCurrentPosition());
-            telemetry.addData("horizontal encoder position", horizontal.getCurrentPosition());
+            telemetry.addData("right front power", rf);
+            telemetry.addData("right back power", rb);
+            telemetry.addData("left front power", lf);
+            telemetry.addData("left back power", lb);
+
+//            telemetry.addData("X Position", globalPositionUpdate.returnXCoordinate() / COUNTS_PER_INCH);
+//            telemetry.addData("Y Position", globalPositionUpdate.returnYCoordinate() / COUNTS_PER_INCH);
+//            telemetry.addData("Orientation (Degrees)", globalPositionUpdate.returnOrientation());
+//
+//            telemetry.addData("Vertical left encoder position", verticalLeft.getCurrentPosition());
+//            telemetry.addData("Vertical right encoder position", verticalRight.getCurrentPosition());
+//            telemetry.addData("horizontal encoder position", horizontal.getCurrentPosition());
 
             telemetry.update();
 

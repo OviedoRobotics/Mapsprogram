@@ -42,6 +42,7 @@ public class OmniTeleOpDrive extends OpMode {
         telemetry.addLine("Calling robot.init");
         updateTelemetry(telemetry);
         robot.init(hardwareMap);
+        onbot.init(hardwareMap);
         telemetry.addLine("Ready");
         updateTelemetry(telemetry);
     }
@@ -142,13 +143,14 @@ public class OmniTeleOpDrive extends OpMode {
             // we are holding it so the next time it is pressed it will trigger the action
             // again.
             x2Held = false;
+            onbot.acq2.setPower(0);
         }
 
 
         y2Pressed = gamepad2.y;
 
         if(y2Pressed && !y2Held) {
-            int newHeight = onbot.acq2.getCurrentPosition();
+            int newHeight = 0;
             if( newHeight > 5 ) {
                 newHeight -= HEIGHT_INCREMENT;
 

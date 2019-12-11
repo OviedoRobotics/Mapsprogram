@@ -59,6 +59,10 @@ public class HardwareSensors
     public void resetEncoders() {
         acq1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         acq2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        acq1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        acq2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
     }
 
     /* Initialize standard Hardware interfaces */

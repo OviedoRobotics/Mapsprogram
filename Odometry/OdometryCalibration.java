@@ -56,7 +56,7 @@ public class OdometryCalibration extends LinearOpMode {
         imu = hardwareMap.get(BNO055IMU.class, "imu");
 
         //Initialize IMU parameters
-        BNO055IMU.remapAxes(imu, AxesOrder.XYZ, AxesReference.NPN);
+        //BNO055IMU.remapAxes(imu, AxesOrder.XYZ, AxesReference.NPN);
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
