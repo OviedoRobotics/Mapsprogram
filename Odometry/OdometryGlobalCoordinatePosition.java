@@ -78,7 +78,7 @@ public class OdometryGlobalCoordinatePosition implements Runnable{
         double p = ((rightChange + leftChange) / 2);
         double n = horizontalChange;
 
-        //Calculate and update the position values
+        //Calculate and update the position values (Switched x and y)
         robotGlobalXCoordinatePosition = robotGlobalXCoordinatePosition + (p*Math.sin(robotOrientationRadians) + n*Math.cos(robotOrientationRadians));
         robotGlobalYCoordinatePosition = robotGlobalYCoordinatePosition + (p*Math.cos(robotOrientationRadians) - n*Math.sin(robotOrientationRadians));
 

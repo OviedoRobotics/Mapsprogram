@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.Mapsprogram.Odometry;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -54,6 +56,7 @@ public class OdometryCalibration extends LinearOpMode {
         imu = hardwareMap.get(BNO055IMU.class, "imu");
 
         //Initialize IMU parameters
+        BNO055IMU.remapAxes(imu, AxesOrder.XYZ, AxesReference.NPN);
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;

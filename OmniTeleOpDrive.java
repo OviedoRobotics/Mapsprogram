@@ -20,7 +20,7 @@ import static java.lang.Math.toDegrees;
 @TeleOp(name="Omni: TeleOpDrive", group ="TeleOp")
 public class OmniTeleOpDrive extends OpMode {
     public HardwareOmnibotDrive robot = new HardwareOmnibotDrive();
-    public HardwareSensors onbot = new HardwareSensors();
+    private HardwareSensors onbot = new HardwareSensors();
     static final double INCREMENT   = 0.01;     // amount to slew servo each CYCLE_MS cycle
     static final int    HEIGHT_INCREMENT = 3100;
     static final int    SPIN_INCREMENT = 200;
