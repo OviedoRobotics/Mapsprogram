@@ -124,7 +124,7 @@ public class AcquisitionSystem extends OpMode{
         telemetry.addData("Current Position of Rotation", + onbot.acq2.getCurrentPosition());
         boolean turn = false;
 
-
+        onbot.acq1.setPower(0.25);
 
 
         telemetry.addData("Current Position of Extension", + onbot.acq1.getCurrentPosition() );

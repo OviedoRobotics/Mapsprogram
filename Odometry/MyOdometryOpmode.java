@@ -45,20 +45,20 @@ public class MyOdometryOpmode extends LinearOpMode {
         globalPositionUpdate.reverseRightEncoder();
         globalPositionUpdate.reverseNormalEncoder();
 
-        goToPosition(5*COUNTS_PER_INCH, 0*COUNTS_PER_INCH, 0.25, 0, 1*COUNTS_PER_INCH);
+        goToPosition(20*COUNTS_PER_INCH, 0*COUNTS_PER_INCH, 0.5, 0, 3*COUNTS_PER_INCH);
 
 
         while(opModeIsActive()){
             //Display Global (x, y, theta) coordinates
-            telemetry.addData("X Position", globalPositionUpdate.returnXCoordinate() / COUNTS_PER_INCH);
-            telemetry.addData("Y Position", globalPositionUpdate.returnYCoordinate() / COUNTS_PER_INCH);
-            telemetry.addData("Orientation (Degrees)", globalPositionUpdate.returnOrientation());
+          //  telemetry.addData("X Position", globalPositionUpdate.returnXCoordinate() / COUNTS_PER_INCH);
+          //  telemetry.addData("Y Position", globalPositionUpdate.returnYCoordinate() / COUNTS_PER_INCH);
+          //  telemetry.addData("Orientation (Degrees)", globalPositionUpdate.returnOrientation());
 
-            telemetry.addData("Vertical left encoder position", verticalLeft.getCurrentPosition());
-            telemetry.addData("Vertical right encoder position", verticalRight.getCurrentPosition());
-            telemetry.addData("horizontal encoder position", horizontal.getCurrentPosition());
+            //telemetry.addData("Vertical left encoder position", verticalLeft.getCurrentPosition());
+           // telemetry.addData("Vertical right encoder position", verticalRight.getCurrentPosition());
+          //  telemetry.addData("horizontal encoder position", horizontal.getCurrentPosition());
 
-            telemetry.addData("Thread Active", positionThread.isAlive());
+          //  telemetry.addData("Thread Active", positionThread.isAlive());
             telemetry.update();
         }
 
@@ -92,17 +92,21 @@ public class MyOdometryOpmode extends LinearOpMode {
             double lf = robot_movement_x_component + robot_movement_y_component;
             double lb = robot_movement_x_component - robot_movement_y_component;
 
-//            right_front.setPower(rf);
-//            right_back.setPower(rb);
-//            left_front.setPower(lf);
-//            left_back.setPower(lb);
+            right_front.setPower(rf);
+            right_back.setPower(rb);
+            left_front.setPower(lf);
+            left_back.setPower(lb);
 
             telemetry.addData("right front power", rf);
             telemetry.addData("right back power", rb);
             telemetry.addData("left front power", lf);
             telemetry.addData("left back power", lb);
+            telemetry.addData("Robot movement x", robot_movement_x_component);
+            telemetry.addData("Robot movement y", robot_movement_y_component);
 
-//            telemetry.addData("X Position", globalPositionUpdate.returnXCoordinate() / COUNTS_PER_INCH);
+            telemetry.addData("Y Position", globalPositionUpdate.returnYCoordinate());
+            telemetry.addData("X Position", globalPositionUpdate.returnXCoordinate() / COUNTS_PER_INCH);
+            telemetry.addData("Distance", distance);
 //            telemetry.addData("Y Position", globalPositionUpdate.returnYCoordinate() / COUNTS_PER_INCH);
 //            telemetry.addData("Orientation (Degrees)", globalPositionUpdate.returnOrientation());
 //
@@ -111,9 +115,12 @@ public class MyOdometryOpmode extends LinearOpMode {
 //            telemetry.addData("horizontal encoder position", horizontal.getCurrentPosition());
 
             telemetry.update();
-
         }
 
+        right_front.setPower(0);
+        right_back.setPower(0);
+        left_front.setPower(0);
+        left_back.setPower(0);
     }
 
     private void initDriveHardwareMap(String rfName, String rbName, String lfName, String lbName, String vlEncoderName, String vrEncoderName, String hEncoderName){

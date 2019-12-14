@@ -23,6 +23,7 @@ public class OmniTeleOpDrive extends OpMode {
     private HardwareSensors onbot = new HardwareSensors();
     static final double INCREMENT   = 0.01;     // amount to slew servo each CYCLE_MS cycle
     static final int    HEIGHT_INCREMENT = 3100;
+    static final int    LOWER = 2800;
     static final int    SPIN_INCREMENT = 200;
     static final double LIFT_SPEED = 1.0;
     static final double OPEN    =  0.8;     // Maximum rotational position
@@ -36,6 +37,8 @@ public class OmniTeleOpDrive extends OpMode {
     boolean x2Held = false;
     boolean y2Pressed = false;
     boolean y2Held = false;
+    boolean togglePressed = false;
+    boolean toggleHeld = false;
 
     @Override
     public void init() {
@@ -143,20 +146,23 @@ public class OmniTeleOpDrive extends OpMode {
             // we are holding it so the next time it is pressed it will trigger the action
             // again.
             x2Held = false;
-            onbot.acq2.setPower(0);
         }
 
 
         y2Pressed = gamepad2.y;
 
         if(y2Pressed && !y2Held) {
-            int newHeight = 0;
+            int newHeight = onbot.acq2.getCurrentPosition();
             if( newHeight > 5 ) {
-                newHeight -= HEIGHT_INCREMENT;
+                newHeight -= (LOWER) ;
 
-                onbot.acq2.setTargetPosition(0);
+                onbot.acq2.setTargetPosition(newHeight+100);
                 onbot.acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 onbot.acq2.setPower(LIFT_SPEED);
+                onbot.acq2.setTargetPosition(newHeight);
+                onbot.acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                onbot.acq2.setPower((LIFT_SPEED/2));
+
             }
             else if(newHeight <= 5) {
                 onbot.acq2.setTargetPosition(newHeight);
@@ -165,19 +171,39 @@ public class OmniTeleOpDrive extends OpMode {
             }
         } else if(!y2Pressed) {
             y2Held = false;
+            onbot.acq2.setPower(0);
         }
 
-        telemetry.addData("Current Position of Rotation", + onbot.acq2.getCurrentPosition());
+        telemetry.addData("Current Position of Rotation", + onbot.acq1.getCurrentPosition());
         boolean turn = false;
 
-        onbot.acq1.setPower(gamepad2.left_stick_x);
+        togglePressed = gamepad2.left_stick_button;
+        // if trigger
+        if(x2Pressed && !x2Held) {
+            x2Held = true;
+            int newHeight = onbot.acq2.getCurrentPosition();
+
+            newHeight += HEIGHT_INCREMENT;
+
+            onbot.acq2.setTargetPosition(newHeight);
+            onbot.acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            onbot.acq2.setPower(LIFT_SPEED);
+
+
+        } else if(!x2Pressed) {
+            // This happens if the button is not being pressed at all, which resets that
+            // we are holding it so the next time it is pressed it will trigger the action
+            // again.
+            x2Held = false;
+        }
 
         if(onbot.acq2.getCurrentPosition() > 2000 ) {
             turn = !turn;
         }
 
 
-        telemetry.addData("Current Position of Extension", + onbot.acq1.getCurrentPosition() );
+        telemetry.addData("Current Position of Extension", + onbot.acq2.getCurrentPosition() );
         telemetry.update();
 
         // Open the acquistion system
@@ -206,15 +232,15 @@ public class OmniTeleOpDrive extends OpMode {
         // ////                                                           ////
         // ///////////////////////////////////////////////////////////////////
 
-        // Open the acquistion system
+        // Open the hook system
         if (gamepad2.b) {
-            position2 = UNHOOK;
-            position3 = HOOK;
-        }
-        // secure the block
-        else if(gamepad2.a ){
-            position2 = 0.5;
+            position2 = 0.0;
             position3 = 0.5;
+        }
+        // secure the foundation
+        else if(gamepad2.a ){
+            position2 = 0.65;
+            position3 = 0;
         }
 
         onbot.hook1.setPosition(position2);

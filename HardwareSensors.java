@@ -26,7 +26,7 @@ public class HardwareSensors
 
     // Aquisition objects
     public DcMotor acq1; // Turret
-    public DcMotor acq2;  // Turret
+    public DcMotor acq2;  // Extension
     public Servo arm; // Capture and Release
     public DistanceSensor sensorRange; // Sense distance from stone
     public DistanceSensor sensorRange2; // Confirm distance from stone

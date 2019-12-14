@@ -21,6 +21,7 @@
 
 package org.firstinspires.ftc.teamcode.Mapsprogram;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -29,6 +30,7 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
+
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvInternalCamera;
@@ -37,11 +39,13 @@ import org.openftc.easyopencv.OpenCvPipeline;
 import java.util.ArrayList;
 import java.util.List;
 
+
 /**
  * In this sample, we demonstrate how to use the {@link OpenCvPipeline#onViewportTapped()}
  * callback to switch which stage of a pipeline is rendered to the viewport for debugging
  * purposes. We also show how to get data from the pipeline to your OpMode.
  */
+@Disabled
 @TeleOp
 public class PipelineStageSwitchingExample extends LinearOpMode
 {
