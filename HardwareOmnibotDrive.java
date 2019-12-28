@@ -159,8 +159,8 @@ public class HardwareOmnibotDrive
         double joystickAngle = atan2(yPower, xPower);
         double newPower = driverInputShaping(joystickMagnitude);
         double newSpin = driverInputSpinShaping(spin);
-        double newXPower = newPower * Math.pow((cos(joystickAngle)), 2) * Math.signum(cos(joystickAngle));
-        double newYPower = newPower * Math.pow((sin(joystickAngle)), 2) * Math.signum(sin(joystickAngle));
+        double newXPower = newPower * cos(joystickAngle) ;
+        double newYPower = newPower * sin(joystickAngle) ;
 
         double LFpower = newXPower * cos(leftFrontAngle) + newYPower * sin(leftFrontAngle) + newSpin;
         double LRpower = newXPower * cos(leftRearAngle) + newYPower * sin(leftRearAngle) + newSpin;

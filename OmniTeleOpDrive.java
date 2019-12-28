@@ -22,11 +22,11 @@ public class OmniTeleOpDrive extends OpMode {
     public HardwareOmnibotDrive robot = new HardwareOmnibotDrive();
     private HardwareSensors onbot = new HardwareSensors();
     static final double INCREMENT   = 0.01;     // amount to slew servo each CYCLE_MS cycle
-    static final int    HEIGHT_INCREMENT = 3100;
+    static final int    HEIGHT_INCREMENT = 9+00;
     static final int    LOWER = 2800;
-    static final int    SPIN_INCREMENT = 200;
+    static final int    SPIN_INCREMENT = 1385;
     static final double LIFT_SPEED = 1.0;
-    static final double OPEN    =  0.8;     // Maximum rotational position
+    static final double OPEN    =  1.0;     // Maximum rotational position
     static final double CLOSE   =  0.6;     // Minimum rotational position
     static final double UNHOOK    =  1.0;     // Maximum rotational position
     static final double HOOK   =  0.0;     // Minimum rotational position
@@ -100,6 +100,7 @@ public class OmniTeleOpDrive extends OpMode {
             spin = 0.0;
         }
 
+        // When bumper is pressed, the speed changes
         bumpPressed = gamepad1.right_bumper;
 
         if(bumpPressed && !bumpHeld) {
@@ -153,25 +154,25 @@ public class OmniTeleOpDrive extends OpMode {
 
         if(y2Pressed && !y2Held) {
             int newHeight = onbot.acq2.getCurrentPosition();
-            if( newHeight > 5 ) {
+            if( newHeight > 300 ) {
                 newHeight -= (LOWER) ;
 
-                onbot.acq2.setTargetPosition(newHeight+100);
+                onbot.acq2.setTargetPosition(newHeight+300);
                 onbot.acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 onbot.acq2.setPower(LIFT_SPEED);
-                onbot.acq2.setTargetPosition(newHeight);
+                onbot.acq2.setTargetPosition(newHeight+100);
                 onbot.acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                onbot.acq2.setPower((LIFT_SPEED/2));
+                onbot.acq2.setPower((LIFT_SPEED));
 
             }
-            else if(newHeight <= 5) {
+            else if(newHeight <= 300) {
                 onbot.acq2.setTargetPosition(newHeight);
                 onbot.acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 onbot.acq2.setPower(0);
             }
         } else if(!y2Pressed) {
             y2Held = false;
-            onbot.acq2.setPower(0);
+
         }
 
         telemetry.addData("Current Position of Rotation", + onbot.acq1.getCurrentPosition());
@@ -179,23 +180,23 @@ public class OmniTeleOpDrive extends OpMode {
 
         togglePressed = gamepad2.left_stick_button;
         // if trigger
-        if(x2Pressed && !x2Held) {
-            x2Held = true;
-            int newHeight = onbot.acq2.getCurrentPosition();
+        if(togglePressed && !toggleHeld) {
+            toggleHeld = true;
+            int newSpin = onbot.acq1.getCurrentPosition();
 
-            newHeight += HEIGHT_INCREMENT;
+            newSpin += SPIN_INCREMENT;
 
-            onbot.acq2.setTargetPosition(newHeight);
-            onbot.acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            onbot.acq1.setTargetPosition(newSpin);
+            onbot.acq1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-            onbot.acq2.setPower(LIFT_SPEED);
+            onbot.acq1.setPower(LIFT_SPEED);
 
 
-        } else if(!x2Pressed) {
+        } else if(!togglePressed) {
             // This happens if the button is not being pressed at all, which resets that
             // we are holding it so the next time it is pressed it will trigger the action
             // again.
-            x2Held = false;
+            togglePressed = false;
         }
 
         if(onbot.acq2.getCurrentPosition() > 2000 ) {

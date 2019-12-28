@@ -54,14 +54,17 @@ public class Auto_Time extends LinearOpMode{
 //
 //
 //
-//          //spin
+//          //robot spin
             drive(-0.50, 1);
             sleep(2500);
 
+            // drive forward
             drive(1, -1);
             sleep(500);
             drive(0.50, -1);
-            sleep(4000);
+            sleep(3000);
+
+            // Unhook
             onbot.hook1.setPosition(0);
             onbot.hook2.setPosition(0.5);
             sleep(1000);

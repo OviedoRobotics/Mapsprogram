@@ -47,7 +47,7 @@ import java.util.List;
  */
 @Disabled
 @TeleOp
-public class PipelineStageSwitchingExample extends LinearOpMode
+public class PipelineStageSwitching extends LinearOpMode
 {
     OpenCvCamera phoneCam;
     StageSwitchingPipeline stageSwitchingPipeline;

@@ -17,6 +17,7 @@ public class HardwareSensors
     public final static String ACQU1 = "a1";
     public final static String ACQU2 = "a2";
     public final static String ARM = "arm";
+    public final static String FINE_MOVEMENT = "adjust";
     public final static String SENSOR_RANGE_1 = "range1";
     public final static String SENSOR_RANGE_2 = "range2";
 
@@ -27,12 +28,15 @@ public class HardwareSensors
     // Aquisition objects
     public DcMotor acq1; // Turret
     public DcMotor acq2;  // Extension
+    public Servo fineMovemnt; // Minor adjustments (rarely used)
     public Servo arm; // Capture and Release
     public DistanceSensor sensorRange; // Sense distance from stone
     public DistanceSensor sensorRange2; // Confirm distance from stone
 
     // Variables
-    private
+    private final int DENEST = 1400; // Subject to change
+    private final int LIFT_TO_DENEST = 850; // Subject to change
+    private final int LEVEL_INCREMENT = 1000;
 
     /* local OpMode members. */
     HardwareMap hwMap           =  null;
@@ -43,13 +47,10 @@ public class HardwareSensors
 
     }
 
-    public int extentsion(int heightIn) {
-        return heightIn*1000;
+    public int extension(int level) {
+        return level*LEVEL_INCREMENT;
     }
 
-    public int spin(int degrees) {
-        return degrees * 1000;
-    }
 
     public void withEncoders(){
         acq1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -62,7 +63,16 @@ public class HardwareSensors
 
         acq1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         acq2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    }
 
+    public void denest(){
+        acq2.setTargetPosition(LIFT_TO_DENEST);
+        acq2.setPower(1);
+        acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        acq1.setTargetPosition(DENEST);
+        acq1.setPower(1);
+        acq1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
     /* Initialize standard Hardware interfaces */
@@ -77,6 +87,7 @@ public class HardwareSensors
         sensorRange2 = hwMap.get(DistanceSensor.class, SENSOR_RANGE_2);
         hook1 = hwMap.get(Servo.class, HOOK_1);
         hook2 = hwMap.get(Servo.class, HOOK_2);
+        fineMovemnt = hwMap.get(Servo.class, FINE_MOVEMENT);
         arm = hwMap.get(Servo.class, ARM);
 
         acq1.setDirection(DcMotor.Direction.REVERSE);
