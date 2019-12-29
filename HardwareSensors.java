@@ -10,6 +10,12 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 public class HardwareSensors
 {
     /* Public OpMode members. */
+    public enum DENEST_ACTIVITY {
+        IDLE,
+        LIFTING_TO_ROTATE,
+        ROTATING,
+        LOWERING_TO_POSITION
+    }
 
     // Strings for config
     public final static String HOOK_1 = "h1";
@@ -21,7 +27,7 @@ public class HardwareSensors
     public final static String SENSOR_RANGE_1 = "range1";
     public final static String SENSOR_RANGE_2 = "range2";
 
-       // Foundation objects
+    // Foundation objects
     public Servo hook1; // Hook left
     public Servo hook2; // Hook right
 
@@ -32,6 +38,7 @@ public class HardwareSensors
     public Servo arm; // Capture and Release
     public DistanceSensor sensorRange; // Sense distance from stone
     public DistanceSensor sensorRange2; // Confirm distance from stone
+    public DENEST_ACTIVITY denestState = DENEST_ACTIVITY.IDLE;
 
     // Variables
     private final int DENEST = 1400; // Subject to change
@@ -65,18 +72,57 @@ public class HardwareSensors
         acq2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
-    public void denest() throws InterruptedException {
-        acq2.setTargetPosition(LIFT_TO_DENEST);
-        acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        acq2.setPower(1);
-        acq1.setTargetPosition(DENEST);
-        acq1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        acq1.setPower(1);
+    public boolean startDenesting() {
+        // This is more of a design pattern to show if the start happened or not.
+        boolean startingDenest = false;
 
-        acq2.setTargetPosition(0);
-        acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        acq2.setPower(0.5);
+        // We don't want to start denesting if it is in the middle of denesting.
+        if(denestState != DENEST_ACTIVITY.IDLE) {
+            startingDenest = true;
+            acq2.setTargetPosition(LIFT_TO_DENEST);
+            acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            acq2.setPower(1);
+            // This activates the performDenesting function to start executing.
+            denestState = DENEST_ACTIVITY.LIFTING_TO_ROTATE;
+        }
 
+        return startingDenest;
+    }
+    public void performDenesting() {
+        switch(denestState) {
+            case LIFTING_TO_ROTATE:
+                // When acq2 is not busy, that means it finished lifting. // !acq2.isBusy()
+                if(acq2.getCurrentPosition() > (LIFT_TO_DENEST - 15) && acq2.getCurrentPosition() < (LIFT_TO_DENEST + 15)) {
+                    // Time to start rotating.
+                    acq1.setTargetPosition(DENEST);
+                    acq1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    acq1.setPower(1);
+                    // Set our state to the next step.  Next time through the OpMode loop
+                    // it will get to the next step.
+                    denestState = DENEST_ACTIVITY.ROTATING;
+                }
+                break;
+            case ROTATING:
+                // When acq1 is not busy, that means it finished rotating.
+                if(acq1.getCurrentPosition() > (DENEST - 15) && acq1.getCurrentPosition() < (DENEST + 15)) {
+                    acq2.setTargetPosition(0);
+                    acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    acq2.setPower(0.5);
+                    // Set our state to the next step.  Next time through the OpMode loop
+                    // it will get to the next step.
+                    denestState = DENEST_ACTIVITY.LOWERING_TO_POSITION;
+                }
+                break;
+            case LOWERING_TO_POSITION:
+                if(acq1.getCurrentPosition() > (DENEST - 15) && acq1.getCurrentPosition() < (DENEST + 15) && acq2.getCurrentPosition() > -15 && acq2.getCurrentPosition() < 15 ) {
+                    // We are done, go back to IDLE.
+                    denestState = DENEST_ACTIVITY.IDLE;
+                }
+                break;
+            case IDLE:
+                // Do nothing.
+                break;
+        }
     }
 
     /* Initialize standard Hardware interfaces */

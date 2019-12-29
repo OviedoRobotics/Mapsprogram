@@ -1,11 +1,9 @@
 package org.firstinspires.ftc.teamcode.Mapsprogram;
 
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -54,9 +52,9 @@ public class AcquisitionSystem extends OpMode {
      * Code to run ONCE when the driver hits PLAY
      */
     @Override
-    public void start() throws InterruptedException {
+    public void start() {
         runtime.reset();
-        onbot.denest();
+        onbot.startDenesting();
 
     }
     /*
@@ -76,14 +74,19 @@ public class AcquisitionSystem extends OpMode {
         // If x2 was pressed, but not held
         if(x2Pressed && !x2Held && nest) {
             x2Held = true;
-            countLevel++;
-            int up = onbot.extension(countLevel);
+            // So doing stuff with acq2 and acq1 in here might conflict with the activity in onbot.
+            // So for instance it might make the isBusy no longer work.  So might have to integrate
+            // stuff like this into the activities below in onbot.  For now checking the activity state
+            // to make sure it doesn't interfere.
+            if(onbot.denestState == HardwareSensors.DENEST_ACTIVITY.IDLE) {
+                countLevel++;
+                int up = onbot.extension(countLevel);
 
-            onbot.acq2.setTargetPosition(up);
-            onbot.acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                onbot.acq2.setTargetPosition(up);
+                onbot.acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-            onbot.acq2.setPower(1);
-
+                onbot.acq2.setPower(1);
+            }
         } else if(!x2Pressed) {
             // This happens if the button is not being pressed at all, which resets that
             // we are holding it so the next time it is pressed it will trigger the action
@@ -129,11 +132,17 @@ public class AcquisitionSystem extends OpMode {
 
         onbot.arm.setPosition(position);
 
-        if( position == OPEN && onbot.acq2.getCurrentPosition() > 0 ){
-            onbot.acq2.setTargetPosition(0);
-            onbot.acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        // So doing stuff with acq2 and acq1 in here might conflict with the activity in onbot.
+        // So for instance it might make the isBusy no longer work.  So might have to integrate
+        // stuff like this into the activities below in onbot.  For now checking the activity state
+        // to make sure it doesn't interfere.
+        if(onbot.denestState == HardwareSensors.DENEST_ACTIVITY.IDLE) {
+            if (position == OPEN && onbot.acq2.getCurrentPosition() > 0) {
+                onbot.acq2.setTargetPosition(0);
+                onbot.acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-            onbot.acq2.setPower(0.5);
+                onbot.acq2.setPower(0.5);
+            }
         }
 
         // ///////////////////////////////////////////////////////////////////
@@ -155,6 +164,10 @@ public class AcquisitionSystem extends OpMode {
 
         onbot.hook1.setPosition(position2);
         onbot.hook2.setPosition(position3);
+
+        // We have a block of all of our "perform" functions at the end of our loop.
+        // If the activity isn't doing anything, it should just return.
+        onbot.performDenesting();
     }
 
     /*
