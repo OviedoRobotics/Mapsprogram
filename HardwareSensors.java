@@ -69,7 +69,6 @@ public class HardwareSensors
         acq2.setTargetPosition(LIFT_TO_DENEST);
         acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         acq2.setPower(1);
-        sleep
         acq1.setTargetPosition(DENEST);
         acq1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         acq1.setPower(1);
