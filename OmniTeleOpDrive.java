@@ -22,7 +22,7 @@ public class OmniTeleOpDrive extends OpMode {
     public HardwareOmnibotDrive robot = new HardwareOmnibotDrive();
     private HardwareSensors onbot = new HardwareSensors();
     static final double INCREMENT   = 0.01;     // amount to slew servo each CYCLE_MS cycle
-    static final int    HEIGHT_INCREMENT = 9+00;
+    static final int    HEIGHT_INCREMENT = 900;
     static final int    LOWER = 2800;
     static final int    SPIN_INCREMENT = 1385;
     static final double LIFT_SPEED = 1.0;
@@ -157,10 +157,10 @@ public class OmniTeleOpDrive extends OpMode {
             if( newHeight > 300 ) {
                 newHeight -= (LOWER) ;
 
-                onbot.acq2.setTargetPosition(newHeight+300);
+                onbot.acq2.setTargetPosition(newHeight);
                 onbot.acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 onbot.acq2.setPower(LIFT_SPEED);
-                onbot.acq2.setTargetPosition(newHeight+100);
+                onbot.acq2.setTargetPosition(newHeight);
                 onbot.acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 onbot.acq2.setPower((LIFT_SPEED));
 
@@ -205,25 +205,18 @@ public class OmniTeleOpDrive extends OpMode {
 
 
         telemetry.addData("Current Position of Extension", + onbot.acq2.getCurrentPosition() );
+        telemetry.addData("Current Position of Turn", + onbot.acq1.getCurrentPosition() );
         telemetry.update();
 
-        // Open the acquistion system
+        // Open the acquisition system
         if(gamepad2.left_bumper  ) {
-            // Keep stepping up until we hit the max value.
-            position += INCREMENT ;
-            if (position >= OPEN ) {
-                position = OPEN;
-            }
+            position = OPEN;
         }
         // secure the block
         else if(gamepad2.right_bumper ){
-            // Keep stepping down until we hit the min value.
-            position -= INCREMENT ;
-            if (position <= CLOSE ) {
-                position = CLOSE;
-
-            }
+            position = CLOSE;
         }
+
 
         onbot.arm.setPosition(position);
 

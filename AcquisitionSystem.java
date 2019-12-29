@@ -23,6 +23,7 @@ public class AcquisitionSystem extends OpMode {
     static final double CLOSE   =  0.6;     // Minimum rotational position
     static final double UNHOOK    =  0.0, UNHOOK1    =  0.5;     // Maximum rotational position for hooks
     static final double HOOK   =  0.0, HOOK1 = 0.65;     // Minimum rotational position
+    static final double UP = 0, DOWN = 1.0;
     static  int countLevel = 0;
     boolean x2Pressed = false;
     boolean x2Held = false;
@@ -53,23 +54,23 @@ public class AcquisitionSystem extends OpMode {
      * Code to run ONCE when the driver hits PLAY
      */
     @Override
-    public void start() {
+    public void start() throws InterruptedException {
         runtime.reset();
-        //onbot.denest();
+        onbot.denest();
 
     }
     /*
      * Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
      */
     @Override
-    public void loop() {
+    public void loop(){
 
         ///////////////////////////////////////////////////////////////////
         ////                                                           ////
         ////              Acquisition System program                   ////
         ////                                                           ////
         ///////////////////////////////////////////////////////////////////
-        //onbot.denest();
+
 
         x2Pressed = gamepad2.x;
         // If x2 was pressed, but not held
@@ -90,17 +91,34 @@ public class AcquisitionSystem extends OpMode {
             x2Held = false;
         }
 
-        double upPower = -gamepad1.left_stick_y;
-        
-        onbot.acq2.setPower(upPower);
+        double position1 = 0;
 
+        //down
+        if(gamepad2.left_stick_y > 0.02  ) {
+            // Keep stepping up until we hit the max value.
+            position1 += INCREMENT ;
+            if (position1 >= UP ) {
+                position1 = UP;
+            }
+        }
+        //up
+        else if(gamepad2.left_stick_y < 0.02 ){
+            // Keep stepping down until we hit the min value.
+            position1 -= INCREMENT ;
+            if (position1 <= DOWN ) {
+                position1 = DOWN;
+
+            }
+        }
+
+        onbot.fineMovemnt.setPosition(position1);
 
 
         telemetry.addData("Current Position of Extension", + onbot.acq2.getCurrentPosition() );
         telemetry.addData("Current Position of Turn", + onbot.acq1.getCurrentPosition() );
         telemetry.update();
 
-        // Open the acquistion system
+        // Open the acquisition system
         if(gamepad2.left_bumper  ) {
             position = OPEN;
         }
@@ -111,7 +129,12 @@ public class AcquisitionSystem extends OpMode {
 
         onbot.arm.setPosition(position);
 
-        if( position == OPEN && onbot.acq2.getCurrentPosition() > )
+        if( position == OPEN && onbot.acq2.getCurrentPosition() > 0 ){
+            onbot.acq2.setTargetPosition(0);
+            onbot.acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            onbot.acq2.setPower(0.5);
+        }
 
         // ///////////////////////////////////////////////////////////////////
         // ////                                                           ////
@@ -132,14 +155,6 @@ public class AcquisitionSystem extends OpMode {
 
         onbot.hook1.setPosition(position2);
         onbot.hook2.setPosition(position3);
-    }
-    public double scale(double n)
-    {
-        return n;
-    }
-    public void limitforExtension( double power )
-    {
-
     }
 
     /*
