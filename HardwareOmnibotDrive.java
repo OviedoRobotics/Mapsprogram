@@ -3,11 +3,13 @@ package org.firstinspires.ftc.teamcode.Mapsprogram;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 import static java.lang.Math.abs;
@@ -33,7 +35,8 @@ public class HardwareOmnibotDrive
     public final static String FRONT_RIGHT_MOTOR = "r1";
     public final static String REAR_LEFT_MOTOR = "l2";
     public final static String REAR_RIGHT_MOTOR = "r2";
-
+    public final static String SENSOR_RANGE_1 = "range1";
+    public final static String SENSOR_RANGE_2 = "range2";
 
     // Hardware objects
     protected DcMotor frontLeft = null;
@@ -41,6 +44,8 @@ public class HardwareOmnibotDrive
     protected DcMotor rearLeft = null;
     protected DcMotor rearRight = null;
     protected BNO055IMU imu = null;
+    public DistanceSensor sensorRange; // Sense distance from stone
+    public DistanceSensor sensorRange2; // Confirm distance from stone
 
     // Tracking variables
     private static final int encoderClicksPerSecond = 2800;
@@ -92,6 +97,14 @@ public class HardwareOmnibotDrive
         }
 
         return imuValue;
+    }
+
+    public double readBackLeftTo() {
+        return sensorRange.getDistance(DistanceUnit.CM);
+    }
+
+    public double readBackRightTo(){
+        return sensorRange2.getDistance(DistanceUnit.CM);
     }
 
     public void setFrontLeftMotorPower(double power)
@@ -271,7 +284,8 @@ public class HardwareOmnibotDrive
         frontRight  = hwMap.dcMotor.get(FRONT_RIGHT_MOTOR);
         rearLeft = hwMap.dcMotor.get(REAR_LEFT_MOTOR);
         rearRight = hwMap.dcMotor.get(REAR_RIGHT_MOTOR);
-
+        sensorRange = hwMap.get(DistanceSensor.class, SENSOR_RANGE_1);
+        sensorRange2 = hwMap.get(DistanceSensor.class, SENSOR_RANGE_2);
 
         frontLeft.setDirection(DcMotor.Direction.FORWARD);
         frontRight.setDirection(DcMotor.Direction.FORWARD);
@@ -288,5 +302,58 @@ public class HardwareOmnibotDrive
         //resetDriveEncoders(); //Had to exclude for drive to run properly
 
         initIMU();
+    }
+    public boolean gotoRearTarget(double driveSpeed, double spinSpeed){
+        //These are the values we see when it is against the platform
+        double backLeftTargetDistance = 2.0;
+        double backRightTargetDistance = 4.5;
+
+        double leftToDistance = readBackLeftTo();
+        double rightToDistance = readBackRightTo();
+
+        double drivePower = 0.0;
+        double spinPower = 0.0;
+
+        double leftError = backLeftTargetDistance- leftToDistance;
+        double rightError = backRightTargetDistance - rightToDistance;
+        boolean touching = false;
+
+        //Slow down for 10cm
+        double slowDownStart = 20.0;
+        double slowDownRange = 10.0;
+        if((leftError < 0) || (rightError < 0)){
+            //Have to drive backwards towards the foundation
+            drivePower = driveSpeed;
+            //if one of them is within range, drive speed should be minimum, all
+            // rotation
+            if(!((rightError < 0) && (leftError < 0))){
+                drivePower = MIN_DRIVE_RATE;
+                spinPower = Math.copySign(spinPower, MIN_SPIN_RATE);
+
+            } else {
+                // We want the one closer to the foundation minError should be negative.
+                double minError = Math.max(rightError, leftError);
+
+                // Need to set drive power based on range.
+                // Go at slowest speed.
+                double scaleFactor = 0.95 * (slowDownRange - (slowDownStart + minError))/ slowDownRange + MIN_DRIVE_RATE;
+                scaleFactor = Math.min(1.0, scaleFactor);
+                drivePower = driveSpeed * scaleFactor;
+            }
+            // make sure we don't go below minimum spin power;
+            if(spinPower < MIN_SPIN_RATE) {
+                spinPower = Math.copySign(spinPower, MIN_SPIN_RATE);
+            }
+            // make sure we don't go below minimum drive power.
+            if(drivePower < MIN_DRIVE_RATE){
+                drivePower = MIN_DRIVE_RATE;
+            }
+            // Scale the power based on how far
+            drive( 0, -drivePower, -spinPower, -readIMU());
+        }else {
+            drive(0, -MIN_DRIVE_RATE, 0, -readIMU());
+            touching = true;
+        }
+        return touching;
     }
 }

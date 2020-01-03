@@ -24,8 +24,6 @@ public class HardwareSensors
     public final static String ACQU2 = "a2";
     public final static String ARM = "arm";
     public final static String FINE_MOVEMENT = "adjust";
-    public final static String SENSOR_RANGE_1 = "range1";
-    public final static String SENSOR_RANGE_2 = "range2";
 
     // Foundation objects
     public Servo hook1; // Hook left
@@ -36,8 +34,6 @@ public class HardwareSensors
     public DcMotor acq2;  // Extension
     public Servo fineMovemnt; // Minor adjustments (rarely used)
     public Servo arm; // Capture and Release
-    public DistanceSensor sensorRange; // Sense distance from stone
-    public DistanceSensor sensorRange2; // Confirm distance from stone
     public DENEST_ACTIVITY denestState = DENEST_ACTIVITY.IDLE;
 
     // Variables
@@ -72,6 +68,16 @@ public class HardwareSensors
         acq2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
+    public void denest(){
+        acq2.setTargetPosition(LIFT_TO_DENEST);
+        acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        acq2.setPower(1);
+
+        acq1.setTargetPosition(DENEST);
+        acq1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        acq1.setPower(1);
+    }
+
     public boolean startDenesting() {
         // This is more of a design pattern to show if the start happened or not.
         boolean startingDenest = false;
@@ -91,8 +97,8 @@ public class HardwareSensors
     public void performDenesting() {
         switch(denestState) {
             case LIFTING_TO_ROTATE:
-                // When acq2 is not busy, that means it finished lifting. // !acq2.isBusy()
-                if(acq2.getCurrentPosition() > (LIFT_TO_DENEST - 15) && acq2.getCurrentPosition() < (LIFT_TO_DENEST + 15)) {
+                // When acq2 is not busy, that means it finished lifting.
+                if(!acq2.isBusy()) {
                     // Time to start rotating.
                     acq1.setTargetPosition(DENEST);
                     acq1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -104,7 +110,7 @@ public class HardwareSensors
                 break;
             case ROTATING:
                 // When acq1 is not busy, that means it finished rotating.
-                if(acq1.getCurrentPosition() > (DENEST - 15) && acq1.getCurrentPosition() < (DENEST + 15)) {
+                if(!acq1.isBusy()) {
                     acq2.setTargetPosition(0);
                     acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     acq2.setPower(0.5);
@@ -114,7 +120,7 @@ public class HardwareSensors
                 }
                 break;
             case LOWERING_TO_POSITION:
-                if(acq1.getCurrentPosition() > (DENEST - 15) && acq1.getCurrentPosition() < (DENEST + 15) && acq2.getCurrentPosition() > -15 && acq2.getCurrentPosition() < 15 ) {
+                if(!acq1.isBusy()) {
                     // We are done, go back to IDLE.
                     denestState = DENEST_ACTIVITY.IDLE;
                 }
@@ -133,8 +139,6 @@ public class HardwareSensors
         // Define and Initialize Hardware
         acq1 = hwMap.get(DcMotor.class, ACQU1);
         acq2 = hwMap.get(DcMotor.class, ACQU2);
-        sensorRange = hwMap.get(DistanceSensor.class, SENSOR_RANGE_1);
-        sensorRange2 = hwMap.get(DistanceSensor.class, SENSOR_RANGE_2);
         hook1 = hwMap.get(Servo.class, HOOK_1);
         hook2 = hwMap.get(Servo.class, HOOK_2);
         fineMovemnt = hwMap.get(Servo.class, FINE_MOVEMENT);
