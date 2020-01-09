@@ -48,9 +48,13 @@ public class MyOdometryOpmode extends LinearOpMode {
         globalPositionUpdate.reverseRightEncoder();
         globalPositionUpdate.reverseNormalEncoder();
 
-        goToPosition(1000*COUNTS_PER_INCH,0*COUNTS_PER_INCH, 0.5, 0, 3*COUNTS_PER_INCH);
+        goToPosition(-50*COUNTS_PER_INCH,0*COUNTS_PER_INCH, 0.5, 0, 3*COUNTS_PER_INCH);
 
+        goToPosition(20 *COUNTS_PER_INCH, 20*COUNTS_PER_INCH, 0.5,0, 1 * COUNTS_PER_INCH);
 
+        goToPosition(40 *COUNTS_PER_INCH, 20*COUNTS_PER_INCH, 0.5,0, 1 * COUNTS_PER_INCH);
+
+        goToPosition(20 *COUNTS_PER_INCH, 40*COUNTS_PER_INCH, 0.5,0, 1 * COUNTS_PER_INCH);
         while(opModeIsActive()){
             //Display Global (x, y, theta) coordinates
           //  telemetry.addData("X Position", globalPositionUpdate.returnXCoordinate() / COUNTS_PER_INCH);
@@ -75,30 +79,36 @@ public class MyOdometryOpmode extends LinearOpMode {
     public void goToPosition(double targetXPosition, double targetYPosition, double robotPower, double desiredRobotOrientation, double allowableDistanceError){
         double distanceToXTarget = targetXPosition - globalPositionUpdate.returnXCoordinate();
         double distanceToYTarget = targetYPosition - globalPositionUpdate.returnYCoordinate();
+        int timesLooped = 0;
 
         double distance = Math.hypot(distanceToXTarget, distanceToYTarget);
         while(opModeIsActive() && distance > allowableDistanceError){
+            timesLooped++;
             distance = Math.hypot(distanceToXTarget, distanceToYTarget);
-            distanceToYTarget = targetXPosition - globalPositionUpdate.returnXCoordinate();
-            distanceToXTarget = targetYPosition - globalPositionUpdate.returnYCoordinate();
+            distanceToXTarget = targetXPosition - globalPositionUpdate.returnXCoordinate();
+            distanceToYTarget = targetYPosition - globalPositionUpdate.returnYCoordinate();
 
+            double robotMovementAngle = Math.atan2(distanceToYTarget, distanceToXTarget);
 
-            double robotMovementAngle = Math.toDegrees(Math.atan2(distanceToYTarget, distanceToXTarget));
+            double relativeAngleToPoint = AngleWrap(robotMovementAngle - (Math.toRadians(globalPositionUpdate.returnOrientation()) - Math.toRadians(90)));
 
-            double relativeXToPoint = calculateX(robotMovementAngle, distance) * robotPower;
-            double relativeYToPoint = calculateY(robotMovementAngle, distance) * robotPower;
+            double relativeXToPoint = calculateX(relativeAngleToPoint, distance);
+            double relativeYToPoint = calculateY(relativeAngleToPoint, distance);
 
             double movementXPower = relativeXToPoint/ (Math.abs(relativeXToPoint) * Math.abs(relativeYToPoint));
             double movementYPower = relativeYToPoint/ (Math.abs(relativeXToPoint) * Math.abs(relativeYToPoint));
 
+            double movement_x = movementXPower * robotPower;
+            double movement_y = movementYPower * robotPower;
 
-            double pivotCorrection = desiredRobotOrientation - globalPositionUpdate.returnOrientation();
-            double movement_turn = Range.clip(pivotCorrection/Math.toRadians(30), -1, 1)* robotPower;
+            double relativeTurnAngle = relativeYToPoint - Math.toRadians(180) + desiredRobotOrientation;
+
+            double movement_turn = Range.clip(relativeTurnAngle/Math.toRadians(30), -1, 1) * robotPower;
 
             double rf = movementXPower - movementYPower;
             double rb = movementXPower + movementYPower;
-            double lb = (movementXPower - movementYPower);
-            double lf = movementYPower - movementXPower;
+            double lb = movementYPower - movementXPower;
+            double lf = (-movementXPower - movementYPower);
 
             right_front.setPower(rf);
             right_back.setPower(rb);
@@ -109,12 +119,15 @@ public class MyOdometryOpmode extends LinearOpMode {
             telemetry.addData("right back power", rb);
             telemetry.addData("left front power", lf);
             telemetry.addData("left back power", lb);
-            telemetry.addData("Robot movement x", relativeXToPoint);
-            telemetry.addData("Robot movement y", relativeYToPoint);
+            telemetry.addData("Robot movement x", movementXPower);
+            telemetry.addData("Robot movement y", movementYPower);
+
+            telemetry.addData("Movement angle", robotMovementAngle);
 
             telemetry.addData("Y Position", globalPositionUpdate.returnYCoordinate()/ COUNTS_PER_INCH);
             telemetry.addData("X Position", globalPositionUpdate.returnXCoordinate() / COUNTS_PER_INCH);
-            telemetry.addData("Distance", distance);
+            telemetry.addData("Distance", distance/ COUNTS_PER_INCH);
+            telemetry.addData("Times Looped", timesLooped);
 
             telemetry.update();
         }
@@ -187,4 +200,16 @@ public class MyOdometryOpmode extends LinearOpMode {
     private double calculateY(double desiredAngle, double distance) {
         return Math.sin(Math.toRadians(desiredAngle)) * distance;
     }
+
+    public static double AngleWrap(double angle){
+        while (angle < -Math.PI){
+            angle +=2*Math.PI;
+        }
+        while (angle > Math.PI){
+            angle -=2*Math.PI;
+        }
+        return angle;
+
+    }
+
 }

@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.Mapsprogram;
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.opencv.core.Core;
@@ -32,9 +32,9 @@ import java.util.List;
  * monitor: 640 x 480
  *YES
  */
-@Autonomous(name= "opencvSkystoneDetector", group="Sky autonomous")
+
 //comment out this line before using
-public class SkystoneDetection extends LinearOpMode {
+public class SkystoneDetection {
     private ElapsedTime runtime = new ElapsedTime();
 
     //0 means skystone, 1 means yellow stone
@@ -59,29 +59,29 @@ public class SkystoneDetection extends LinearOpMode {
 
     OpenCvCamera phoneCam;
 
-    @Override
-    public void runOpMode() throws InterruptedException {
-
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+    public void initCamera(HardwareMap ahwMap){
+        int cameraMonitorViewId = ahwMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", ahwMap.appContext.getPackageName());
         phoneCam = new OpenCvInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
         phoneCam.openCameraDevice();//open camera
         phoneCam.setPipeline(new StageSwitchingPipeline());//different stages
         phoneCam.startStreaming(rows, cols, OpenCvCameraRotation.SIDEWAYS_RIGHT);//display on RC
         //width, height
         //width = height in this case, because camera is in portrait mode.
+    }
 
-        waitForStart();
-        runtime.reset();
-        while (opModeIsActive()) {
-            telemetry.addData("Values", valLeft+"   "+valMid+"   "+valRight);
-            telemetry.addData("Height", rows);
-            telemetry.addData("Width", cols);
-
-            telemetry.update();
-            sleep(100);
-
+    public int skystoneLocation() {
+        if( valLeft == 0){
+            return 1;
+        }
+        else if ( valMid == 0){
+            return 2;
+        }
+        else{
+            return 3;
         }
     }
+
+
 
     //detection pipeline
     static class StageSwitchingPipeline extends OpenCvPipeline

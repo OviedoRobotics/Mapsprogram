@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Autonomous
-public class Auto_Time extends LinearOpMode{
+public class Auto_Time_R extends LinearOpMode{
         private ElapsedTime runtime = new ElapsedTime();
         HardwareOmnibotDrive robot = new HardwareOmnibotDrive();
         HardwareSensors onbot = new HardwareSensors();
