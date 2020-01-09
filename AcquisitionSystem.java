@@ -54,7 +54,7 @@ public class AcquisitionSystem extends OpMode {
     @Override
     public void start() {
         runtime.reset();
-        onbot.startDenesting();
+        onbot.denest();
 
     }
     /*
@@ -79,7 +79,7 @@ public class AcquisitionSystem extends OpMode {
             // stuff like this into the activities below in onbot.  For now checking the activity state
             // to make sure it doesn't interfere.
             if(onbot.denestState == HardwareSensors.DENEST_ACTIVITY.IDLE) {
-                countLevel++;
+                countLevel = 1;
                 int up = onbot.extension(countLevel);
 
                 onbot.acq2.setTargetPosition(up);
@@ -94,6 +94,28 @@ public class AcquisitionSystem extends OpMode {
             x2Held = false;
         }
 
+        y2Pressed = gamepad2.y;
+
+        if(y2Pressed && !y2Held) {
+            int newHeight = onbot.acq2.getCurrentPosition();
+            if( newHeight > 300 ) {
+
+                onbot.acq2.setTargetPosition(0);
+                onbot.acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                onbot.acq2.setPower(0.75);
+
+
+            }
+            else if(newHeight <= 300) {
+                onbot.acq2.setTargetPosition(0);
+                onbot.acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                onbot.acq2.setPower(0.75);
+            }
+        } else if(!y2Pressed) {
+            y2Held = false;
+
+        }
+
         double position1 = 0;
 
         //down
@@ -103,7 +125,8 @@ public class AcquisitionSystem extends OpMode {
             if (position1 >= UP ) {
                 position1 = UP;
             }
-        }
+            onbot.fineMovemnt.setPosition(position1);
+                    }
         //up
         else if(gamepad2.left_stick_y < 0.02 ){
             // Keep stepping down until we hit the min value.
@@ -112,9 +135,9 @@ public class AcquisitionSystem extends OpMode {
                 position1 = DOWN;
 
             }
+            onbot.fineMovemnt.setPosition(position1);
         }
 
-        onbot.fineMovemnt.setPosition(position1);
 
 
         telemetry.addData("Current Position of Extension", + onbot.acq2.getCurrentPosition() );
@@ -167,7 +190,7 @@ public class AcquisitionSystem extends OpMode {
 
         // We have a block of all of our "perform" functions at the end of our loop.
         // If the activity isn't doing anything, it should just return.
-        onbot.performDenesting();
+        //onbot.performDenesting();
     }
 
     /*

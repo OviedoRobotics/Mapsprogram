@@ -48,7 +48,7 @@ public class MyOdometryOpmode extends LinearOpMode {
         globalPositionUpdate.reverseRightEncoder();
         globalPositionUpdate.reverseNormalEncoder();
 
-        goToPosition(20*COUNTS_PER_INCH, 0*COUNTS_PER_INCH, 0.5, 0, 3*COUNTS_PER_INCH);
+        goToPosition(1000*COUNTS_PER_INCH,0*COUNTS_PER_INCH, 0.5, 0, 3*COUNTS_PER_INCH);
 
 
         while(opModeIsActive()){
@@ -97,13 +97,13 @@ public class MyOdometryOpmode extends LinearOpMode {
 
             double rf = movementXPower - movementYPower;
             double rb = movementXPower + movementYPower;
+            double lb = (movementXPower - movementYPower);
             double lf = movementYPower - movementXPower;
-            double lb = (-movementXPower - movementYPower);
-//
-//            right_front.setPower(rf);
-//            right_back.setPower(rb);
-//            left_front.setPower(lf);
-//            left_back.setPower(lb);
+
+            right_front.setPower(rf);
+            right_back.setPower(rb);
+            left_front.setPower(lf);
+            left_back.setPower(lb);
 
             telemetry.addData("right front power", rf);
             telemetry.addData("right back power", rb);
@@ -112,15 +112,9 @@ public class MyOdometryOpmode extends LinearOpMode {
             telemetry.addData("Robot movement x", relativeXToPoint);
             telemetry.addData("Robot movement y", relativeYToPoint);
 
-            telemetry.addData("Y Position", globalPositionUpdate.returnYCoordinate());
+            telemetry.addData("Y Position", globalPositionUpdate.returnYCoordinate()/ COUNTS_PER_INCH);
             telemetry.addData("X Position", globalPositionUpdate.returnXCoordinate() / COUNTS_PER_INCH);
             telemetry.addData("Distance", distance);
-//            telemetry.addData("Y Position", globalPositionUpdate.returnYCoordinate() / COUNTS_PER_INCH);
-//            telemetry.addData("Orientation (Degrees)", globalPositionUpdate.returnOrientation());
-//
-//            telemetry.addData("Vertical left encoder position", verticalLeft.getCurrentPosition());
-//            telemetry.addData("Vertical right encoder position", verticalRight.getCurrentPosition());
-//            telemetry.addData("horizontal encoder position", horizontal.getCurrentPosition());
 
             telemetry.update();
         }
