@@ -69,7 +69,7 @@ public class OmniTeleOpDrive extends OpMode {
     public void start()
     {
         //onbot.startDenesting();
-        //onbot.denest();
+        onbot.denest();
     }
 
     @Override
@@ -137,7 +137,7 @@ public class OmniTeleOpDrive extends OpMode {
             // So for instance it might make the isBusy no longer work.  So might have to integrate
             // stuff like this into the activities below in onbot.  For now checking the activity state
             // to make sure it doesn't interfere.
-            if(onbot.denestState == HardwareSensors.DENEST_ACTIVITY.IDLE) {
+            //if(onbot.denestState == HardwareSensors.DENEST_ACTIVITY.IDLE) {
                 int height = onbot.acq2.getCurrentPosition();
                 height += 600;
 
@@ -146,7 +146,7 @@ public class OmniTeleOpDrive extends OpMode {
 
                 onbot.acq2.setPower(1);
 
-            }
+            //}
         } else if(!x2Pressed) {
             // This happens if the button is not being pressed at all, which resets that
             // we are holding it so the next time it is pressed it will trigger the action
@@ -229,14 +229,14 @@ public class OmniTeleOpDrive extends OpMode {
 
         onbot.arm.setPosition(position);
 
-        if(onbot.denestState == HardwareSensors.DENEST_ACTIVITY.IDLE) {
-            if (position == OPEN && onbot.acq2.getCurrentPosition() > 0) {
-                onbot.acq2.setTargetPosition(0);
-                onbot.acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-                onbot.acq2.setPower(0.5);
-            }
-        }
+//        if(onbot.denestState == HardwareSensors.DENEST_ACTIVITY.IDLE) {
+//            if (position == OPEN && onbot.acq2.getCurrentPosition() > 0) {
+//                onbot.acq2.setTargetPosition(0);
+//                onbot.acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//
+//                onbot.acq2.setPower(0.5);
+//            }
+//        }
 
         // ///////////////////////////////////////////////////////////////////
         // ////                                                           ////
@@ -260,6 +260,5 @@ public class OmniTeleOpDrive extends OpMode {
 
         // We have a block of all of our "perform" functions at the end of our loop.
         // If the activity isn't doing anything, it should just return.
-        onbot.performDenesting();
     }
 }
