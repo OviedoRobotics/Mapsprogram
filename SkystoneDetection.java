@@ -22,7 +22,7 @@ import java.util.List;
 
 
 /**
- * Created by maryjaneb  on 11/13/2016.
+ * Created by MAPS.
  *
  * nerverest ticks
  * 60 1680
@@ -47,7 +47,7 @@ public class SkystoneDetection {
     private static float rectWidth = 1.5f/8f;
 
     private static float offsetX = 0f/8f;//changing this moves the three rects and the three circles left or right, range : (-2, 2) not inclusive
-    private static float offsetY = 0f/8f;//changing this moves the three rects and circles up or down, range: (-4, 4) not inclusive
+    private static float offsetY = 1f/8f;//changing this moves the three rects and circles up or down, range: (-4, 4) not inclusive
 
     private static float[] midPos = {4f/8f+offsetX, 4f/8f+offsetY};//0 = col, 1 = row
     private static float[] leftPos = {2f/8f+offsetX, 4f/8f+offsetY};
@@ -70,14 +70,17 @@ public class SkystoneDetection {
     }
 
     public int skystoneLocation() {
-        if( valLeft == 0){
+        if( valLeft == 0 && valMid == 255 & valRight == 255){
             return 1;
         }
-        else if ( valMid == 0){
+        else if ( valLeft == 255 && valMid == 0 & valRight == 255){
             return 2;
         }
-        else{
+        else if(valLeft == 255 && valMid == 255 & valRight == 0) {
             return 3;
+        }
+        else{
+            return 0;
         }
     }
 

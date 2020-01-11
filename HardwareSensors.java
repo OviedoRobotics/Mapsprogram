@@ -37,8 +37,8 @@ public class HardwareSensors
     public DENEST_ACTIVITY denestState = DENEST_ACTIVITY.IDLE;
 
     // Variables
-    private final int DENEST = 1400; // Subject to change
-    private final int LIFT_TO_DENEST = 850; // Subject to change
+    private final int DENEST = 1300; // Subject to change
+    private final int LIFT_TO_DENEST = 1200; // Subject to change
     private final int LEVEL_INCREMENT = 1000;
 
     /* local OpMode members. */

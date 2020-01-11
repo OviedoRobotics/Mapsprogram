@@ -23,7 +23,7 @@ public class OmniTeleOpDrive extends OpMode {
     HardwareOmnibotDrive robot = new HardwareOmnibotDrive();
     private ElapsedTime runtime = new ElapsedTime();
     static final double INCREMENT   = 0.01;     // amount to slew servo each CYCLE_MS cycle
-    static final double OPEN    =  0.8;     // Maximum rotational position
+    static final double OPEN    =  1.0;     // Maximum rotational position
     static final double CLOSE   =  0.6;     // Minimum rotational position
     static final double UNHOOK    =  0.0, UNHOOK1    =  0.5;     // Maximum rotational position for hooks
     static final double HOOK   =  0.0, HOOK1 = 0.65;     // Minimum rotational position
@@ -163,10 +163,10 @@ public class OmniTeleOpDrive extends OpMode {
                 int down = onbot.acq2.getCurrentPosition() - 250;
                 onbot.acq2.setTargetPosition(down);
                 onbot.acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                onbot.acq2.setPower(0.5);
+                onbot.acq2.setPower(0.80);
                 onbot.acq2.setTargetPosition(down-50);
                 onbot.acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                onbot.acq2.setPower(-0.25);
+                onbot.acq2.setPower(0.25);
                 telemetry.addData("Started", "now");
                 telemetry.update();
 
@@ -179,24 +179,24 @@ public class OmniTeleOpDrive extends OpMode {
         double position1 = 0;
 
         //down
-        if(gamepad2.left_stick_y > 0.02  ) {
-            // Keep stepping up until we hit the max value.
-            position1 += INCREMENT ;
-            if (position1 >= UP ) {
-                position1 = UP;
-            }
-            onbot.fineMovemnt.setPosition(position1);
-        }
-        //up
-        else if(gamepad2.left_stick_y < 0.02 ){
-            // Keep stepping down until we hit the min value.
-            position1 -= INCREMENT ;
-            if (position1 <= DOWN ) {
-                position1 = DOWN;
-
-            }
-            onbot.fineMovemnt.setPosition(position1);
-        }
+//        if(gamepad2.left_stick_y > 0.02  ) {
+//            // Keep stepping up until we hit the max value.
+//            position1 += INCREMENT ;
+//            if (position1 >= UP ) {
+//                position1 = UP;
+//            }
+//            onbot.fineMovemnt.setPosition(position1);
+//        }
+//        //up
+//        else if(gamepad2.left_stick_y < 0.02 ){
+//            // Keep stepping down until we hit the min value.
+//            position1 -= INCREMENT ;
+//            if (position1 <= DOWN ) {
+//                position1 = DOWN;
+//
+//            }
+//            onbot.fineMovemnt.setPosition(position1);
+//        }
 
 
 
@@ -257,6 +257,8 @@ public class OmniTeleOpDrive extends OpMode {
 
         onbot.hook1.setPosition(position2);
         onbot.hook2.setPosition(position3);
+
+        onbot.fineMovemnt.setPosition(UP);
 
         // We have a block of all of our "perform" functions at the end of our loop.
         // If the activity isn't doing anything, it should just return.

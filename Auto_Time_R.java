@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@Autonomous
+@Autonomous(name="Auto-RED")
 public class Auto_Time_R extends LinearOpMode{
         private ElapsedTime runtime = new ElapsedTime();
         HardwareOmnibotDrive robot = new HardwareOmnibotDrive();
@@ -18,6 +18,7 @@ public class Auto_Time_R extends LinearOpMode{
 
             robot.init(hardwareMap);
             onbot.init(hardwareMap);
+            robot.initIMU();
 
             telemetry.addData("Status", "Initialized");
             telemetry.update();
@@ -38,10 +39,13 @@ public class Auto_Time_R extends LinearOpMode{
             //drive forward
             drive(1, -1);
             sleep(380);
+
             drive(0.25, -1);
             sleep(80);
+
             drive(0, 0);
             sleep(500);
+
             //Hook
             drive(0.1, -1);
             onbot.hook1.setPosition(0.65);
@@ -54,7 +58,7 @@ public class Auto_Time_R extends LinearOpMode{
 //
 //
 //
-//          //robot spin
+//          //spin
             drive(-0.50, 1);
             sleep(2500);
 
@@ -62,12 +66,14 @@ public class Auto_Time_R extends LinearOpMode{
             drive(1, -1);
             sleep(500);
             drive(0.50, -1);
-            sleep(3000);
+            sleep(4000);
 
-            // Unhook
+            //unhook
             onbot.hook1.setPosition(0);
             onbot.hook2.setPosition(0.5);
             sleep(1000);
+
+            // drive backwards
             drive(-0.5, -1);
             sleep(400);
 
@@ -81,27 +87,27 @@ public class Auto_Time_R extends LinearOpMode{
 
         }
 
-        public void shuffle(double power, int direction ) {
-            robot.frontLeft.setDirection(DcMotor.Direction.REVERSE);
-            robot.rearLeft.setDirection(DcMotor.Direction.REVERSE);
+    public void shuffle(double power, int direction ) {
+        robot.frontLeft.setDirection(DcMotor.Direction.REVERSE);
+        robot.rearLeft.setDirection(DcMotor.Direction.REVERSE);
 
-            robot.frontRight.setPower(power*direction);
-            robot.rearRight.setPower(power);
-            robot.frontLeft.setPower(power*direction);
-            robot.rearLeft.setPower(power);
-        }
-        public void drive( double power,int direction) {
-            robot.frontLeft.setDirection(DcMotor.Direction.FORWARD);
-            robot.rearLeft.setDirection(DcMotor.Direction.FORWARD);
+        robot.frontRight.setPower(power*direction);
+        robot.rearRight.setPower(power);
+        robot.frontLeft.setPower(power*direction);
+        robot.rearLeft.setPower(power);
+    }
+    public void drive( double power,int direction) {
+        robot.frontLeft.setDirection(DcMotor.Direction.FORWARD);
+        robot.rearLeft.setDirection(DcMotor.Direction.FORWARD);
 
-            robot.frontRight.setPower(power);
-            robot.rearRight.setPower(power);
-            robot.frontLeft.setPower(power*direction);
-            robot.rearLeft.setPower(power*direction);
-        }
-        public void turn(double degrees, int direction) {
-
-        }
+        robot.frontRight.setPower(power);
+        robot.rearRight.setPower(power);
+        robot.frontLeft.setPower(power*direction);
+        robot.rearLeft.setPower(power*direction);
+    }
+    public void turn(double degrees, int direction) {
 
     }
+
+}
 
