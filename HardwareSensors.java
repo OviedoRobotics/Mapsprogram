@@ -17,6 +17,13 @@ public class HardwareSensors
         LOWERING_TO_POSITION
     }
 
+    public enum ACQUIRE_ACTIVITY {
+        IDLE,
+        LOWER,
+        ACQUIRE,
+        RAISE
+    }
+
     // Strings for config
     public final static String HOOK_1 = "h1";
     public final static String HOOK_2 = "h2";
@@ -35,10 +42,11 @@ public class HardwareSensors
     public Servo fineMovemnt; // Minor adjustments (rarely used)
     public Servo arm; // Capture and Release
     public DENEST_ACTIVITY denestState = DENEST_ACTIVITY.IDLE;
+    public ACQUIRE_ACTIVITY acquireState = ACQUIRE_ACTIVITY.IDLE;
 
     // Variables
-    private final int DENEST = 1300; // Subject to change
-    private final int LIFT_TO_DENEST = 2400; // Subject to change
+    private final int DENEST = 1350; // Subject to change
+    private final int LIFT_TO_DENEST = 2800; // Subject to change
     private final int LEVEL_INCREMENT = 1000;
 
     /* local OpMode members. */
@@ -88,6 +96,7 @@ public class HardwareSensors
             acq2.setTargetPosition(LIFT_TO_DENEST);
             acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             acq2.setPower(1);
+            fineMovemnt.setPosition(0);
 
             // This activates the perform Denesting function to start executing.
             denestState = DENEST_ACTIVITY.LIFTING_TO_ROTATE;
@@ -102,7 +111,7 @@ public class HardwareSensors
         switch(denestState) {
             case LIFTING_TO_ROTATE:
                 // When acq2 is not busy, that means it finished lifting.
-                if(!acq2.isBusy()) {
+                if(acq2.getCurrentPosition() > 2500) {
                     // Time to start rotating.
                     acq1.setTargetPosition(DENEST);
                     acq1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -114,10 +123,11 @@ public class HardwareSensors
                 break;
             case ROTATING:
                 // When acq1 is not busy, that means it finished rotating.
-                if(!acq1.isBusy()) {
+                if(acq1.getCurrentPosition() > 1250) {
                     acq2.setTargetPosition(0);
                     acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     acq2.setPower(0.5);
+                    fineMovemnt.setPosition(1);
                     // Set our state to the next step.  Next time through the OpMode loop
                     // it will get to the next step.
                     denestState = DENEST_ACTIVITY.LOWERING_TO_POSITION;
@@ -134,7 +144,60 @@ public class HardwareSensors
                 break;
         }
     }
+    public boolean startAcquiring(){
+        // This is more of a design pattern to show if the start happened or not.
+        boolean startingAcquire;
 
+        // We don't want to start acquiring if it is in the middle of acquiring.
+        if(acquireState == ACQUIRE_ACTIVITY.IDLE) {
+            startingAcquire = true;
+            fineMovemnt.setPosition(0.90);
+
+            // This activates the perform starting to  function to start executing.
+            acquireState = ACQUIRE_ACTIVITY.LOWER;
+        }
+        else{
+            startingAcquire = false;
+        }
+        return startingAcquire;
+    }
+    public void performAcquire(){
+        switch(acquireState) {
+            case LOWER:
+                // When finemovement reaches this position, that means it finished lifting.
+                if(fineMovemnt.getPosition() == 0.90) {
+                    // Time to start rotating.
+                    acq1.setTargetPosition(DENEST);
+                    acq1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    acq1.setPower(1);
+                    // Set our state to the next step.  Next time through the OpMode loop
+                    // it will get to the next step.
+                    denestState = DENEST_ACTIVITY.ROTATING;
+                }
+                break;
+            case ROTATING:
+                // When acq1 is not busy, that means it finished rotating.
+                if(!acq1.isBusy()) {
+                    acq2.setTargetPosition(0);
+                    acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    acq2.setPower(0.5);
+                    fineMovemnt.setPosition(1);
+                    // Set our state to the next step.  Next time through the OpMode loop
+                    // it will get to the next step.
+                    denestState = DENEST_ACTIVITY.LOWERING_TO_POSITION;
+                }
+                break;
+            case LOWERING_TO_POSITION:
+                if(!acq1.isBusy()) {
+                    // We are done, go back to IDLE.
+                    denestState = DENEST_ACTIVITY.IDLE;
+                }
+                break;
+            case IDLE:
+                // Do nothing.
+                break;
+        }
+    }
     /* Initialize standard Hardware interfaces */
     public void init(HardwareMap ahwMap) {
         // Save reference to Hardware map

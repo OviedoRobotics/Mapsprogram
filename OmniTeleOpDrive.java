@@ -14,11 +14,11 @@ import static java.lang.Math.atan2;
 import static java.lang.Math.toDegrees;
 
 /**
- * Created by 12090 STEM Punk
+ * Modified by Jazmyn
  */
 
 @TeleOp(name="Omni: TeleOpDrive", group ="TeleOp")
-public class OmniTeleOpDrive extends OpMode {
+public class OmniTeleOpDrive extends OpMode{
     HardwareSensors onbot = new HardwareSensors();
     HardwareOmnibotDrive robot = new HardwareOmnibotDrive();
     private ElapsedTime runtime = new ElapsedTime();
@@ -27,7 +27,7 @@ public class OmniTeleOpDrive extends OpMode {
     static final double CLOSE   =  0;     // Minimum rotational position
     static final double UNHOOK    =  0.0, UNHOOK1    =  0.5;     // Maximum rotational position for hooks
     static final double HOOK   =  0.0, HOOK1 = 0.65;     // Minimum rotational position
-    static final double UP = 0, DOWN = 1.0;
+    static final double UP = 0, DOWN = 0.45;
     static  int countLevel = 0;
     boolean x2Pressed = false;
     boolean x2Held = false;
@@ -37,7 +37,7 @@ public class OmniTeleOpDrive extends OpMode {
     double  position2; // Start at halfway position
     double position3;
     double  position = 0; // Start at halfway position
-
+    double position4 = UP;
     @Override
     public void init() {
         telemetry.addLine("Calling robot.init");
@@ -73,7 +73,7 @@ public class OmniTeleOpDrive extends OpMode {
     }
 
     @Override
-    public void loop() {
+    public void loop(){
         // In order to use sensor values throughout the program, we use the call
         // to read the sensor.  But since this is a costly call to make we cache
         // the value and return it until we reset reads to the sensors again.
@@ -120,6 +120,7 @@ public class OmniTeleOpDrive extends OpMode {
         robot.drive(speedMultiplier * xPower, speedMultiplier * yPower, spinMultiplier * spin, driverAngle);        bumpPressed = gamepad1.right_bumper;
 
 
+
         telemetry.addData("Y Power: ", yPower);
         telemetry.addData("X Power: ", xPower);
         telemetry.addData("Spin: ", spin);
@@ -137,7 +138,7 @@ public class OmniTeleOpDrive extends OpMode {
             // So for instance it might make the isBusy no longer work.  So might have to integrate
             // stuff like this into the activities below in onbot.  For now checking the activity state
             // to make sure it doesn't interfere.
-            if(onbot.denestState != HardwareSensors.DENEST_ACTIVITY.IDLE) {
+            if(onbot.denestState == HardwareSensors.DENEST_ACTIVITY.IDLE) {
             int height = onbot.acq2.getCurrentPosition();
             height += 1000;
 
@@ -197,18 +198,24 @@ public class OmniTeleOpDrive extends OpMode {
         telemetry.addData("Current Position of Turn", + onbot.acq1.getCurrentPosition() );
         telemetry.update();
 
+
+
         // Open the acquisition system
         if(gamepad2.left_bumper  ) {
             position = OPEN;
-            onbot.fineMovemnt.setPosition(DOWN);
+            position4 = DOWN;
+
         }
         // secure the block
         else if(gamepad2.right_bumper ){
             position = CLOSE;
-            onbot.fineMovemnt.setPosition(UP);
+            position4 = UP;
         }
 
         onbot.arm.setPosition(position);
+        if(onbot.arm.getPosition() == OPEN || onbot.arm.getPosition() == CLOSE ) {
+            onbot.fineMovemnt.setPosition(position4);
+        }
 
 //        if(onbot.denestState == HardwareSensors.DENEST_ACTIVITY.IDLE) {
 //            if (position == OPEN && onbot.acq2.getCurrentPosition() > 0) {
@@ -232,9 +239,9 @@ public class OmniTeleOpDrive extends OpMode {
         }
         // secure the foundation
         else if(gamepad2.a ){
-            position2 = 0.65;
+            position2 = 0.6;
             position3 = 0;
-            //robot.gotoRearTarget(0.5,0.25);
+            robot.gotoRearTarget(0.5,0.25);
         }
 
         onbot.hook1.setPosition(position2);
@@ -242,5 +249,6 @@ public class OmniTeleOpDrive extends OpMode {
 
         // We have a block of all of our "perform" functions at the end of our loop.
         // If the activity isn't doing anything, it should just return.
+        onbot.performDenesting();
     }
 }
