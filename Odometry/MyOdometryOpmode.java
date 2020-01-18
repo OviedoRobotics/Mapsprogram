@@ -95,8 +95,8 @@ public class MyOdometryOpmode extends LinearOpMode {
             double relativeXToPoint = calculateX(relativeAngleToPoint, distance);
             double relativeYToPoint = calculateY(relativeAngleToPoint, distance);
 
-            double movementXPower = relativeXToPoint/ (Math.abs(relativeXToPoint) * Math.abs(relativeYToPoint));
-            double movementYPower = relativeYToPoint/ (Math.abs(relativeXToPoint) * Math.abs(relativeYToPoint));
+            double movementXPower = relativeXToPoint/ (Math.abs(relativeXToPoint) + Math.abs(relativeYToPoint));
+            double movementYPower = relativeYToPoint/ (Math.abs(relativeXToPoint) + Math.abs(relativeYToPoint));
 
             double movement_x = movementXPower * robotPower;
             double movement_y = movementYPower * robotPower;
@@ -105,10 +105,10 @@ public class MyOdometryOpmode extends LinearOpMode {
 
             double movement_turn = Range.clip(relativeTurnAngle/Math.toRadians(30), -1, 1) * robotPower;
 
-            double rf = movementXPower - movementYPower;
-            double rb = movementXPower + movementYPower;
-            double lb = movementYPower - movementXPower;
-            double lf = (-movementXPower - movementYPower);
+            double rf = movement_x - movement_y - movement_turn;
+            double rb = movement_x + movement_y + movement_turn;
+            double lb = movement_x + movement_y - movement_turn;
+            double lf = movement_x - movement_y + movement_turn;
 
             right_front.setPower(rf);
             right_back.setPower(rb);

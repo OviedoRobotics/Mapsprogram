@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.Mapsprogram.Odometry.OdometryGlobalCoordin
 /**
  * Modified by Jazmyn James on 12/20/19
  */
-@TeleOp(name = "My Odometry OpMode")
+@TeleOp(name = "Odometry OpMode")
 public class OdometryOpmode_1 extends LinearOpMode {
 
     //Drive motors
@@ -48,13 +48,8 @@ public class OdometryOpmode_1 extends LinearOpMode {
         globalPositionUpdate.reverseRightEncoder();
         globalPositionUpdate.reverseNormalEncoder();
 
-        goToPosition(-50*COUNTS_PER_INCH,0*COUNTS_PER_INCH, 0.5, 0, 3*COUNTS_PER_INCH);
+        goToPosition(10*COUNTS_PER_INCH,0*COUNTS_PER_INCH, 0.5, 0, 3*COUNTS_PER_INCH);
 
-        goToPosition(20 *COUNTS_PER_INCH, 20*COUNTS_PER_INCH, 0.5,0, 1 * COUNTS_PER_INCH);
-
-        goToPosition(40 *COUNTS_PER_INCH, 20*COUNTS_PER_INCH, 0.5,0, 1 * COUNTS_PER_INCH);
-
-        goToPosition(20 *COUNTS_PER_INCH, 40*COUNTS_PER_INCH, 0.5,0, 1 * COUNTS_PER_INCH);
         while(opModeIsActive()){
             //Display Global (x, y, theta) coordinates
             //  telemetry.addData("X Position", globalPositionUpdate.returnXCoordinate() / COUNTS_PER_INCH);
@@ -79,14 +74,14 @@ public class OdometryOpmode_1 extends LinearOpMode {
     public void goToPosition(double targetXPosition, double targetYPosition, double robotPower, double desiredRobotOrientation, double allowableDistanceError){
         double x_world = globalPositionUpdate.returnXCoordinate();
         double y_world = globalPositionUpdate.returnYCoordinate();
-        //double angle_world = Math.toRadians(globalPositionUpdate);
+        double angle_world = Math.toRadians(globalPositionUpdate.returnOrientation());
+        double smallAngleSpeed = 0.25;
 
         double distance = Math.hypot(targetXPosition-x_world, targetYPosition - y_world);
         while(opModeIsActive() && distance > allowableDistanceError){
 
             distance = Math.hypot(targetXPosition-x_world, targetYPosition - y_world);
-            //distanceToXTarget = targetXPosition - globalPositionUpdate.returnXCoordinate();
-            //distanceToYTarget = targetYPosition - globalPositionUpdate.returnYCoordinate();
+
 
             double robotMovementAngle = Math.atan2(targetXPosition-x_world, targetYPosition - y_world);
 
@@ -103,17 +98,17 @@ public class OdometryOpmode_1 extends LinearOpMode {
 
             double robot_radian_err = AngleWrap( Math.toRadians(desiredRobotOrientation) - angle_world );
             double small_rad_error = Math.abs( robot_radian_err / Math.toRadians(10.0) );
-            double adjusted_turn_power = (small_rad_error <= 1.0)? (small_rad_error * smallAngleSpeed) : turn_power;
+            double adjusted_turn_power = (small_rad_error <= 1.0)? (small_rad_error * smallAngleSpeed) : robotPower;
             double rotation_power = (robot_radian_err > 0.0)? adjusted_turn_power : -adjusted_turn_power;
 
             double relativeTurnAngle = relativeYToPoint - Math.toRadians(180) + desiredRobotOrientation;
 
             double movement_turn = Range.clip(relativeTurnAngle/Math.toRadians(30), -1, 1) * robotPower;
 
-            double rf = movementXPower - movementYPower;
-            double rb = movementXPower + movementYPower;
-            double lb = movementYPower - movementXPower;
-            double lf = (-movementXPower - movementYPower);
+            double rf = movement_x - movement_y - movement_turn;
+            double rb = movement_x + movement_y + movement_turn;
+            double lb = movement_x + movement_y - movement_turn;
+            double lf = movement_x - movement_y + movement_turn;
 
             right_front.setPower(rf);
             right_back.setPower(rb);

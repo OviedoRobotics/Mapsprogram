@@ -38,7 +38,7 @@ public class HardwareSensors
 
     // Variables
     private final int DENEST = 1300; // Subject to change
-    private final int LIFT_TO_DENEST = 1200; // Subject to change
+    private final int LIFT_TO_DENEST = 2400; // Subject to change
     private final int LEVEL_INCREMENT = 1000;
 
     /* local OpMode members. */
@@ -80,16 +80,20 @@ public class HardwareSensors
 
     public boolean startDenesting() {
         // This is more of a design pattern to show if the start happened or not.
-        boolean startingDenest = false;
+        boolean startingDenest;
 
         // We don't want to start denesting if it is in the middle of denesting.
-        if(denestState != DENEST_ACTIVITY.IDLE) {
+        if(denestState == DENEST_ACTIVITY.IDLE) {
             startingDenest = true;
             acq2.setTargetPosition(LIFT_TO_DENEST);
             acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             acq2.setPower(1);
-            // This activates the performDenesting function to start executing.
+
+            // This activates the perform Denesting function to start executing.
             denestState = DENEST_ACTIVITY.LIFTING_TO_ROTATE;
+        }
+        else{
+            startingDenest = false;
         }
 
         return startingDenest;

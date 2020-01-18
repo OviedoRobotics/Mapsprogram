@@ -23,8 +23,8 @@ public class OmniTeleOpDrive extends OpMode {
     HardwareOmnibotDrive robot = new HardwareOmnibotDrive();
     private ElapsedTime runtime = new ElapsedTime();
     static final double INCREMENT   = 0.01;     // amount to slew servo each CYCLE_MS cycle
-    static final double OPEN    =  1.0;     // Maximum rotational position
-    static final double CLOSE   =  0.6;     // Minimum rotational position
+    static final double OPEN    =  0.6;     // Maximum rotational position
+    static final double CLOSE   =  0;     // Minimum rotational position
     static final double UNHOOK    =  0.0, UNHOOK1    =  0.5;     // Maximum rotational position for hooks
     static final double HOOK   =  0.0, HOOK1 = 0.65;     // Minimum rotational position
     static final double UP = 0, DOWN = 1.0;
@@ -36,7 +36,7 @@ public class OmniTeleOpDrive extends OpMode {
     boolean y2Held = false;
     double  position2; // Start at halfway position
     double position3;
-    double  position = (OPEN + CLOSE) / 2; // Start at halfway position
+    double  position = 0; // Start at halfway position
 
     @Override
     public void init() {
@@ -68,8 +68,8 @@ public class OmniTeleOpDrive extends OpMode {
     @Override
     public void start()
     {
-        //onbot.startDenesting();
-        onbot.denest();
+        onbot.startDenesting();
+        //onbot.denest();
     }
 
     @Override
@@ -137,16 +137,16 @@ public class OmniTeleOpDrive extends OpMode {
             // So for instance it might make the isBusy no longer work.  So might have to integrate
             // stuff like this into the activities below in onbot.  For now checking the activity state
             // to make sure it doesn't interfere.
-            //if(onbot.denestState == HardwareSensors.DENEST_ACTIVITY.IDLE) {
-                int height = onbot.acq2.getCurrentPosition();
-                height += 600;
+            if(onbot.denestState != HardwareSensors.DENEST_ACTIVITY.IDLE) {
+            int height = onbot.acq2.getCurrentPosition();
+            height += 1000;
 
-                onbot.acq2.setTargetPosition(height);
-                onbot.acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            onbot.acq2.setTargetPosition(height);
+            onbot.acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-                onbot.acq2.setPower(1);
+            onbot.acq2.setPower(1);
 
-            //}
+            }
         } else if(!x2Pressed) {
             // This happens if the button is not being pressed at all, which resets that
             // we are holding it so the next time it is pressed it will trigger the action
@@ -158,45 +158,25 @@ public class OmniTeleOpDrive extends OpMode {
         y2Pressed = gamepad2.y;
 
         if(y2Pressed && !y2Held) {
-            int newHeight = onbot.acq2.getCurrentPosition();
-            newHeight -= 600;
-                int down = onbot.acq2.getCurrentPosition() - 250;
-                onbot.acq2.setTargetPosition(down);
+            if(onbot.acq2.getCurrentPosition() > 0) {
+                int newHeight = onbot.acq2.getCurrentPosition();
+                newHeight -= 1000;
+                onbot.acq2.setTargetPosition(newHeight);
                 onbot.acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                onbot.acq2.setPower(0.80);
-                onbot.acq2.setTargetPosition(down-50);
+                onbot.acq2.setPower(1);
+            }
+            else {
+                int newHeight = onbot.acq2.getCurrentPosition();
+                onbot.acq2.setTargetPosition(newHeight);
                 onbot.acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                onbot.acq2.setPower(0.25);
-                telemetry.addData("Started", "now");
-                telemetry.update();
+                onbot.acq2.setPower(0);
+            }
 
 
         } else if(!y2Pressed) {
             y2Held = false;
 
         }
-
-        double position1 = 0;
-
-        //down
-//        if(gamepad2.left_stick_y > 0.02  ) {
-//            // Keep stepping up until we hit the max value.
-//            position1 += INCREMENT ;
-//            if (position1 >= UP ) {
-//                position1 = UP;
-//            }
-//            onbot.fineMovemnt.setPosition(position1);
-//        }
-//        //up
-//        else if(gamepad2.left_stick_y < 0.02 ){
-//            // Keep stepping down until we hit the min value.
-//            position1 -= INCREMENT ;
-//            if (position1 <= DOWN ) {
-//                position1 = DOWN;
-//
-//            }
-//            onbot.fineMovemnt.setPosition(position1);
-//        }
 
 
 
@@ -220,12 +200,13 @@ public class OmniTeleOpDrive extends OpMode {
         // Open the acquisition system
         if(gamepad2.left_bumper  ) {
             position = OPEN;
+            onbot.fineMovemnt.setPosition(DOWN);
         }
         // secure the block
         else if(gamepad2.right_bumper ){
             position = CLOSE;
+            onbot.fineMovemnt.setPosition(UP);
         }
-
 
         onbot.arm.setPosition(position);
 
@@ -253,12 +234,11 @@ public class OmniTeleOpDrive extends OpMode {
         else if(gamepad2.a ){
             position2 = 0.65;
             position3 = 0;
+            //robot.gotoRearTarget(0.5,0.25);
         }
 
         onbot.hook1.setPosition(position2);
         onbot.hook2.setPosition(position3);
-
-        onbot.fineMovemnt.setPosition(UP);
 
         // We have a block of all of our "perform" functions at the end of our loop.
         // If the activity isn't doing anything, it should just return.
