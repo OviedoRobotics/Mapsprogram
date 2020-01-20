@@ -166,31 +166,27 @@ public class HardwareSensors
             case LOWER:
                 // When finemovement reaches this position, that means it finished lifting.
                 if(fineMovemnt.getPosition() == 0.90) {
-                    // Time to start rotating.
-                    acq1.setTargetPosition(DENEST);
-                    acq1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    acq1.setPower(1);
+                    // Time to start securing the block
+                    arm.setPosition(0);
                     // Set our state to the next step.  Next time through the OpMode loop
                     // it will get to the next step.
-                    denestState = DENEST_ACTIVITY.ROTATING;
+                    acquireState = ACQUIRE_ACTIVITY.ACQUIRE;
                 }
                 break;
-            case ROTATING:
-                // When acq1 is not busy, that means it finished rotating.
-                if(!acq1.isBusy()) {
-                    acq2.setTargetPosition(0);
-                    acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    acq2.setPower(0.5);
-                    fineMovemnt.setPosition(1);
+            case ACQUIRE:
+                // When arm reaches this position, that means it finished rotating.
+                if(arm.getPosition() == 0){
+                    // Time to start going up
+                    fineMovemnt.setPosition(0);
                     // Set our state to the next step.  Next time through the OpMode loop
                     // it will get to the next step.
-                    denestState = DENEST_ACTIVITY.LOWERING_TO_POSITION;
+                    acquireState = ACQUIRE_ACTIVITY.RAISE;
                 }
                 break;
-            case LOWERING_TO_POSITION:
-                if(!acq1.isBusy()) {
+            case RAISE:
+                if(fineMovemnt.getPosition() == 0) {
                     // We are done, go back to IDLE.
-                    denestState = DENEST_ACTIVITY.IDLE;
+                    acquireState = ACQUIRE_ACTIVITY.IDLE;
                 }
                 break;
             case IDLE:

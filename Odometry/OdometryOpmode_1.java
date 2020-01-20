@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.Mapsprogram.HardwareOmnibotDrive;
 import org.firstinspires.ftc.teamcode.Mapsprogram.Odometry.OdometryGlobalCoordinatePosition;
 
 /**
- * Modified by Jazmyn James on 12/20/19
+ * Modified by Jazmyn on 12/20/19
  */
 @TeleOp(name = "Odometry OpMode")
 public class OdometryOpmode_1 extends LinearOpMode {
@@ -48,7 +48,6 @@ public class OdometryOpmode_1 extends LinearOpMode {
         globalPositionUpdate.reverseRightEncoder();
         globalPositionUpdate.reverseNormalEncoder();
 
-        goToPosition(10*COUNTS_PER_INCH,0*COUNTS_PER_INCH, 0.5, 0, 3*COUNTS_PER_INCH);
 
         while(opModeIsActive()){
             //Display Global (x, y, theta) coordinates

@@ -104,9 +104,18 @@ public class HardwareOmnibotDrive
     }
 
     public double readBackRightTo(){
+
         return sensorRange2.getDistance(DistanceUnit.CM);
     }
-
+    public DcMotor leftEncoder(){
+        return rearLeft;
+    }
+    public DcMotor rightEncoder(){
+        return frontRight;
+    }
+    public DcMotor horizontalEncoder(){
+        return frontRight;
+    }
     public void setFrontLeftMotorPower(double power)
     {
         if(power != frontLeftMotorPower)
@@ -141,6 +150,13 @@ public class HardwareOmnibotDrive
             rearRightMotorPower = power;
             rearRight.setPower(power);
         }
+    }
+
+    public void setPowerforAll( double rf, double rb, double lf, double lb) {
+        setFrontRightMotorPower(rf);
+        setRearRightMotorPower(rb);
+        setFrontLeftMotorPower(lf);
+        setRearLeftMotorPower(lb);
     }
 
     public void setAllDrive(double power) {

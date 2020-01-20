@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Mapsprogram.Odometry;
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -10,21 +11,19 @@ import org.firstinspires.ftc.teamcode.Mapsprogram.HardwareOmnibotDrive;
 import org.firstinspires.ftc.teamcode.Mapsprogram.Odometry.OdometryGlobalCoordinatePosition;
 
 /**
- * Created by Jazmyn James on 12/20/19
+ * Modified by Jazmyn on 12/20/19
  */
-@TeleOp(name = "My Odometry OpMode")
+@Autonomous(name = "My Odometry OpMode")
 public class MyOdometryOpmode extends LinearOpMode {
 
+    boolean ODOMETRY_DEBUG = false;
+
     //Drive motors
-    DcMotor right_front, right_back, left_front, left_back;
-    //Odometry Wheels
-    DcMotor verticalLeft, verticalRight, horizontal;
+    HardwareOmnibotDrive robot = new HardwareOmnibotDrive();
+
 
     final double COUNTS_PER_INCH = 307.699557;
 
-    //Hardware Map Names for drive motors and odometry wheels. THIS WILL CHANGE ON EACH ROBOT, YOU NEED TO UPDATE THESE VALUES ACCORDINGLY
-    String rfName = "r1", rbName = "r2", lfName = "l1", lbName = "l2";
-    String verticalLeftEncoderName = lbName, verticalRightEncoderName = rfName, horizontalEncoderName = lfName;
     /*
     For Mapping purposes the front of the robot's face is the of the "A" of the chassis. Ignore the confusing names they wil be changed later.
      */
@@ -33,39 +32,34 @@ public class MyOdometryOpmode extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        //Initialize hardware map values. PLEASE UPDATE THESE VALUES TO MATCH YOUR CONFIGURATION
-        initDriveHardwareMap(rfName, rbName, lfName, lbName, verticalLeftEncoderName, verticalRightEncoderName, horizontalEncoderName);
+        // Show the status of initialization
+        robot.init(hardwareMap);
 
         telemetry.addData("Status", "Init Complete");
         telemetry.update();
         waitForStart();
 
         //Create and start GlobalCoordinatePosition thread to constantly update the global coordinate positions
-        globalPositionUpdate = new OdometryGlobalCoordinatePosition(verticalLeft, verticalRight, horizontal, COUNTS_PER_INCH, 75);
+        globalPositionUpdate = new OdometryGlobalCoordinatePosition(robot.leftEncoder(), robot.rightEncoder(), robot.horizontalEncoder(), COUNTS_PER_INCH, 75);
         Thread positionThread = new Thread(globalPositionUpdate);
         positionThread.start();
 
         globalPositionUpdate.reverseRightEncoder();
         globalPositionUpdate.reverseNormalEncoder();
 
-        goToPosition(-50*COUNTS_PER_INCH,0*COUNTS_PER_INCH, 0.5, 0, 3*COUNTS_PER_INCH);
+        unitTestOdometryDrive();
 
-        goToPosition(20 *COUNTS_PER_INCH, 20*COUNTS_PER_INCH, 0.5,0, 1 * COUNTS_PER_INCH);
-
-        goToPosition(40 *COUNTS_PER_INCH, 20*COUNTS_PER_INCH, 0.5,0, 1 * COUNTS_PER_INCH);
-
-        goToPosition(20 *COUNTS_PER_INCH, 40*COUNTS_PER_INCH, 0.5,0, 1 * COUNTS_PER_INCH);
         while(opModeIsActive()){
             //Display Global (x, y, theta) coordinates
-          //  telemetry.addData("X Position", globalPositionUpdate.returnXCoordinate() / COUNTS_PER_INCH);
-          //  telemetry.addData("Y Position", globalPositionUpdate.returnYCoordinate() / COUNTS_PER_INCH);
-          //  telemetry.addData("Orientation (Degrees)", globalPositionUpdate.returnOrientation());
+            telemetry.addData("X Position", globalPositionUpdate.returnXCoordinate() / COUNTS_PER_INCH);
+            telemetry.addData("Y Position", globalPositionUpdate.returnYCoordinate() / COUNTS_PER_INCH);
+            telemetry.addData("Orientation (Degrees)", globalPositionUpdate.returnOrientation());
 
-            //telemetry.addData("Vertical left encoder position", verticalLeft.getCurrentPosition());
-           // telemetry.addData("Vertical right encoder position", verticalRight.getCurrentPosition());
-          //  telemetry.addData("horizontal encoder position", horizontal.getCurrentPosition());
+            telemetry.addData("Vertical left encoder position", robot.leftEncoder().getCurrentPosition());
+            telemetry.addData("Vertical right encoder position", robot.rightEncoder().getCurrentPosition());
+            telemetry.addData("horizontal encoder position", robot.horizontalEncoder().getCurrentPosition());
 
-          //  telemetry.addData("Thread Active", positionThread.isAlive());
+            telemetry.addData("Thread Active", positionThread.isAlive());
             telemetry.update();
         }
 
@@ -76,21 +70,40 @@ public class MyOdometryOpmode extends LinearOpMode {
         globalPositionUpdate.stop();
 
     }
+    /*--------------------------------------------------------------------------------------------*/
+    // TEST CODE: Verify gyro-based motion functions against a tape measure
+    private void unitTestOdometryDrive() {
+        double fast_power=0.50, fast_xy_tol = 2.00, fast_ang_tol = 2.5;   // power, inches, degrees
+        double slow_power=0.25, slow_xy_tol = 0.75, slow_ang_tol = 1.0;   // power, inches, degrees
+
+        goToPosition( 20.0 * COUNTS_PER_INCH, 0.0 * COUNTS_PER_INCH, 0.5, 0, 1*COUNTS_PER_INCH  );
+
+        robot.setAllDriveZero();
+        sleep( 2000 );
+
+
+    } // unitTestOdometryDrive
+
+    /*--------------------------------------------------------------------------------------------*/
     public void goToPosition(double targetXPosition, double targetYPosition, double robotPower, double desiredRobotOrientation, double allowableDistanceError){
+        // The current Distance to point
         double distanceToXTarget = targetXPosition - globalPositionUpdate.returnXCoordinate();
         double distanceToYTarget = targetYPosition - globalPositionUpdate.returnYCoordinate();
-        int timesLooped = 0;
+        double angleWorld = Math.toRadians(globalPositionUpdate.returnOrientation());
+        double smallAngleSpeed = 0.25;
+        //int timesLooped = 0;
 
         double distance = Math.hypot(distanceToXTarget, distanceToYTarget);
         while(opModeIsActive() && distance > allowableDistanceError){
-            timesLooped++;
+            //timesLooped++;
             distance = Math.hypot(distanceToXTarget, distanceToYTarget);
             distanceToXTarget = targetXPosition - globalPositionUpdate.returnXCoordinate();
             distanceToYTarget = targetYPosition - globalPositionUpdate.returnYCoordinate();
 
             double robotMovementAngle = Math.atan2(distanceToYTarget, distanceToXTarget);
+            angleWorld = Math.toRadians(globalPositionUpdate.returnOrientation());
 
-            double relativeAngleToPoint = AngleWrap(robotMovementAngle - (Math.toRadians(globalPositionUpdate.returnOrientation()) - Math.toRadians(90)));
+            double relativeAngleToPoint = AngleWrap(robotMovementAngle - angleWorld);
 
             double relativeXToPoint = calculateX(relativeAngleToPoint, distance);
             double relativeYToPoint = calculateY(relativeAngleToPoint, distance);
@@ -101,19 +114,42 @@ public class MyOdometryOpmode extends LinearOpMode {
             double movement_x = movementXPower * robotPower;
             double movement_y = movementYPower * robotPower;
 
-            double relativeTurnAngle = relativeYToPoint - Math.toRadians(180) + desiredRobotOrientation;
+            double relativeTurnAngle = AngleWrap(Math.toRadians(desiredRobotOrientation)- angleWorld);
 
             double movement_turn = Range.clip(relativeTurnAngle/Math.toRadians(30), -1, 1) * robotPower;
 
             double rf = movement_x - movement_y - movement_turn;
-            double rb = movement_x + movement_y + movement_turn;
-            double lb = movement_x + movement_y - movement_turn;
-            double lf = movement_x - movement_y + movement_turn;
+            double lf = movement_x + movement_y + movement_turn;
+            double rb = movement_x + movement_y - movement_turn;
+            double lb = movement_x - movement_y + movement_turn;
 
-            right_front.setPower(rf);
-            right_back.setPower(rb);
-            left_front.setPower(lf);
-            left_back.setPower(lb);
+            double maxWheelPower = Math.max( Math.max( Math.abs(lb),  Math.abs(rb)  ),
+                    Math.max( Math.abs(lf), Math.abs(rf) ) );
+            if( ODOMETRY_DEBUG ) {
+                //Display Global (x, y, theta) coordinates
+                telemetry.addData("X Position", globalPositionUpdate.returnXCoordinate() / COUNTS_PER_INCH);
+                telemetry.addData("Y Position", globalPositionUpdate.returnYCoordinate() / COUNTS_PER_INCH);
+                telemetry.addData("Orientation (Degrees)", globalPositionUpdate.returnOrientation());
+
+                telemetry.addData("Vertical left encoder position", robot.leftEncoder().getCurrentPosition());
+                telemetry.addData("Vertical right encoder position", robot.rightEncoder().getCurrentPosition());
+                telemetry.addData("horizontal encoder position", robot.horizontalEncoder().getCurrentPosition());
+
+                telemetry.update();
+                sleep(3500);  // so we can read it
+            }
+
+            if( maxWheelPower > 1.0 )
+            {
+                lb   /= maxWheelPower;
+                rb  /= maxWheelPower;
+                lf  /= maxWheelPower;
+                rf /= maxWheelPower;
+            }
+            robot.setFrontLeftMotorPower(lf);
+            robot.setFrontRightMotorPower(rf);
+            robot.setRearLeftMotorPower(lb);
+            robot.setRearRightMotorPower(rb);
 
             telemetry.addData("right front power", rf);
             telemetry.addData("right back power", rb);
@@ -127,59 +163,17 @@ public class MyOdometryOpmode extends LinearOpMode {
             telemetry.addData("Y Position", globalPositionUpdate.returnYCoordinate()/ COUNTS_PER_INCH);
             telemetry.addData("X Position", globalPositionUpdate.returnXCoordinate() / COUNTS_PER_INCH);
             telemetry.addData("Distance", distance/ COUNTS_PER_INCH);
-            telemetry.addData("Times Looped", timesLooped);
+            //telemetry.addData("Times Looped", timesLooped);
 
             telemetry.update();
         }
 
-        right_front.setPower(0);
-        right_back.setPower(0);
-        left_front.setPower(0);
-        left_back.setPower(0);
+        robot.setFrontLeftMotorPower(0);
+        robot.setFrontRightMotorPower(0);
+        robot.setRearLeftMotorPower(0);
+        robot.setRearRightMotorPower(0);
     }
 
-    private void initDriveHardwareMap(String rfName, String rbName, String lfName, String lbName, String vlEncoderName, String vrEncoderName, String hEncoderName){
-        right_front = hardwareMap.dcMotor.get(rfName);
-        right_back = hardwareMap.dcMotor.get(rbName);
-        left_front = hardwareMap.dcMotor.get(lfName);
-        left_back = hardwareMap.dcMotor.get(lbName);
-
-        verticalLeft = hardwareMap.dcMotor.get(vlEncoderName);
-        verticalRight = hardwareMap.dcMotor.get(vrEncoderName);
-        horizontal = hardwareMap.dcMotor.get(hEncoderName);
-
-        right_front.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        right_back.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        left_front.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        left_back.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        right_front.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        right_back.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        left_front.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        left_back.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        verticalLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        verticalRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        horizontal.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        verticalLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        verticalRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        horizontal.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-
-        right_front.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        right_back.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        left_front.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        left_back.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-        left_front.setDirection(DcMotorSimple.Direction.FORWARD);
-        left_back.setDirection(DcMotorSimple.Direction.FORWARD);
-        right_back.setDirection(DcMotorSimple.Direction.FORWARD);
-        right_front.setDirection(DcMotorSimple.Direction.FORWARD);
-
-        telemetry.addData("Status", "Hardware Map Init Complete");
-        telemetry.update();
-    }
 
     /**
      * Calculate the power in the x direction
@@ -188,7 +182,7 @@ public class MyOdometryOpmode extends LinearOpMode {
      * @return the x vector
      */
     private double calculateX(double desiredAngle, double distance) {
-        return Math.cos(Math.toRadians(desiredAngle)) * distance;
+        return Math.cos(desiredAngle) * distance;
     }
 
     /**
@@ -198,7 +192,7 @@ public class MyOdometryOpmode extends LinearOpMode {
      * @return the y vector
      */
     private double calculateY(double desiredAngle, double distance) {
-        return Math.sin(Math.toRadians(desiredAngle)) * distance;
+        return Math.sin(desiredAngle) * distance;
     }
 
     public static double AngleWrap(double angle){

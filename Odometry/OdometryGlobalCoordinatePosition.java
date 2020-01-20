@@ -133,7 +133,11 @@ public class OdometryGlobalCoordinatePosition implements Runnable{
             normalEncoderPositionMultiplier = 1;
         }
     }
-
+    public void globalCoordinatePositionSet( double x, double y, double angle ){
+        robotGlobalXCoordinatePosition = y;
+        robotGlobalYCoordinatePosition = x;
+        robotOrientationRadians        = Math.toRadians( angle );
+    }
     /**
      * Runs the thread
      */
