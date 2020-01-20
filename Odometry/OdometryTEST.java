@@ -31,6 +31,7 @@ public class OdometryTEST extends LinearOpMode {
 
         // Initialize robot hardware
         robot.init(hardwareMap);
+        robot.initIMU();
 
         // Send telemetry message to signify robot waiting;
         telemetry.addData("State", "Ready");
@@ -38,7 +39,7 @@ public class OdometryTEST extends LinearOpMode {
         waitForStart();
 
         //Create and start GlobalCoordinatePosition thread to constantly update the global coordinate positions
-        globalPositionUpdate = new OdometryGlobalCoordinatePosition( robot.leftEncoder(), robot.rightEncoder(), robot.leftEncoder(), COUNTS_PER_INCH, ODOMETRY_UPDATE_DELAY );
+        globalPositionUpdate = new OdometryGlobalCoordinatePosition( robot.leftEncoder(), robot.rightEncoder(), robot.horizontalEncoder(), COUNTS_PER_INCH, ODOMETRY_UPDATE_DELAY );
         globalPositionUpdate.globalCoordinatePositionSet( (0.0 * COUNTS_PER_INCH), (0.0 * COUNTS_PER_INCH), 0.0 );
 
         Thread positionThread = new Thread(globalPositionUpdate);
@@ -56,17 +57,17 @@ public class OdometryTEST extends LinearOpMode {
         double fast_power=0.50, fast_xy_tol = 2.00, fast_ang_tol = 2.5;   // power, inches, degrees
         double slow_power=0.25, slow_xy_tol = 0.75, slow_ang_tol = 1.0;   // power, inches, degrees
 
-        driveToPosition( 10.0, 0.0, 0.0, slow_power,slow_power, slow_xy_tol, slow_ang_tol );
+        driveToPosition( 0.0, 0.0, 90.0, fast_power,fast_power, slow_xy_tol, slow_ang_tol );
 
         robot.setAllDriveZero();
         sleep( 2000 );
-//
-//        driveToPosition( 10.0, 10.0, 0.0, slow_power,slow_power, slow_xy_tol, slow_ang_tol );
-//
-//        robot.setAllDriveZero();
-//        sleep( 2000 );
-//
-//        driveToPosition( 10.0, 10.0, 90.0, slow_power,slow_power, slow_xy_tol, slow_ang_tol );
+
+        driveToPosition( 10.0, 10.0, 0.0, slow_power,slow_power, slow_xy_tol, slow_ang_tol );
+
+        robot.setAllDriveZero();
+        sleep( 2000 );
+
+        driveToPosition( 10.0, 10.0, 90.0, slow_power,slow_power, slow_xy_tol, slow_ang_tol );
     } // unitTestOdometryDrive
 
     /*--------------------------------------------------------------------------------------------*/
@@ -101,15 +102,15 @@ public class OdometryTEST extends LinearOpMode {
             }
             // Power drivetrain motors to move to where we want to be
             if( moveToPosition( x_target, y_target, drive_angle, move_power, turn_power, xy_tol, ang_tol ) )
-                break;
+               break;
             // Don't recompute until we've had an odometry position update
-            sleep( ODOMETRY_UPDATE_DELAY );
+           sleep( ODOMETRY_UPDATE_DELAY );
             // Do we need to stop and assess?
             if( ODOMETRY_DEBUG ) {
                 // Allow time for motors to produce movement (and 3 odometry updates)
                 sleep(225);
                 // DEBUG!  Power-off motors until our next computational cycle
-                robot.setAllDriveZero();
+//                robot.setAllDriveZero();
             } // ODOMETRY_DEBUG
         } // opModeIsActive()
 
@@ -157,8 +158,8 @@ public class OdometryTEST extends LinearOpMode {
         // Translate X,Y,rotation power levels into mecanum wheel power values
         double frontRight  = movement_x_power - movement_y_power - rotation_power;
         double frontLeft = movement_x_power + movement_y_power + rotation_power;
-        double backRight  = movement_x_power + movement_y_power - rotation_power;
-        double backLeft   = movement_x_power - movement_y_power + rotation_power;
+        double backRight = movement_x_power + movement_y_power - rotation_power;
+        double backLeft  = movement_x_power - movement_y_power + rotation_power;
         // Determine the maximum motor power
         double maxWheelPower = Math.max( Math.max( Math.abs(backLeft),  Math.abs(backRight)  ),
                 Math.max( Math.abs(frontLeft), Math.abs(frontRight) ) );
@@ -187,7 +188,7 @@ public class OdometryTEST extends LinearOpMode {
             frontRight /= maxWheelPower;
         }
         // Update motor power settings:
-        //robot.setPowerforAll( frontRight, backRight, frontLeft, backLeft );
+        robot.setPowerforAll( frontRight, backRight, frontLeft, backLeft );
         return false;
     } // moveToPosition
 

@@ -63,7 +63,6 @@ public class GlobalCoordinatePositionUpdateSample extends LinearOpMode {
 
         //globalPositionUpdate.reverseLeftEncoder();
         globalPositionUpdate.reverseNormalEncoder();
-        globalPositionUpdate.reverseLeftEncoder();
 
         while(opModeIsActive()){
             //Display Global (x, y, theta) coordinates
