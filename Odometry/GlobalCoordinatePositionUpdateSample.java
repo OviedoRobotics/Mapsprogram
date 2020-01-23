@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import org.firstinspires.ftc.teamcode.Mapsprogram.Odometry.OdometryGlobalCoordinatePosition;
 
 /**
- * Created by Sarthak on 6/1/2019.
+ * Created by MAPS
  * Example OpMode that runs the GlobalCoordinatePosition thread and accesses the (x, y, theta) coordinate values
  */
 @TeleOp(name = "Global Coordinate Position Test", group = "Calibration")
@@ -63,7 +63,6 @@ public class GlobalCoordinatePositionUpdateSample extends LinearOpMode {
 
         //globalPositionUpdate.reverseLeftEncoder();
         globalPositionUpdate.reverseNormalEncoder();
-        globalPositionUpdate.reverseLeftEncoder();
 
         while(opModeIsActive()){
             //Display Global (x, y, theta) coordinates

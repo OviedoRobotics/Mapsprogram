@@ -8,7 +8,7 @@ import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import java.io.File;
 
 /**
- * Created by Sarthak on 6/1/2019.
+ * Created by MAPS
  */
 public class OdometryGlobalCoordinatePosition implements Runnable{
     //Odometry wheels
@@ -133,7 +133,11 @@ public class OdometryGlobalCoordinatePosition implements Runnable{
             normalEncoderPositionMultiplier = 1;
         }
     }
-
+    public void globalCoordinatePositionSet( double x, double y, double angle ){
+        robotGlobalXCoordinatePosition = y;
+        robotGlobalYCoordinatePosition = x;
+        robotOrientationRadians        = Math.toRadians( angle );
+    }
     /**
      * Runs the thread
      */

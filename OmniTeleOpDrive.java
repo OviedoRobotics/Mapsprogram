@@ -14,31 +14,30 @@ import static java.lang.Math.atan2;
 import static java.lang.Math.toDegrees;
 
 /**
- * Created by 12090 STEM Punk
+ * Modified by Jazmyn
  */
 
 @TeleOp(name="Omni: TeleOpDrive", group ="TeleOp")
 public class OmniTeleOpDrive extends OpMode {
-    public HardwareOmnibotDrive robot = new HardwareOmnibotDrive();
-    private HardwareSensors onbot = new HardwareSensors();
-    static final double INCREMENT   = 0.01;     // amount to slew servo each CYCLE_MS cycle
-    static final int    HEIGHT_INCREMENT = 900;
-    static final int    LOWER = 2800;
-    static final int    SPIN_INCREMENT = 1385;
-    static final double LIFT_SPEED = 1.0;
-    static final double OPEN    =  1.0;     // Maximum rotational position
-    static final double CLOSE   =  0.6;     // Minimum rotational position
-    static final double UNHOOK    =  1.0;     // Maximum rotational position
-    static final double HOOK   =  0.0;     // Minimum rotational position
-    double  position2 = (UNHOOK - HOOK) / 2; // Start at halfway position
-    double position3 = (UNHOOK - HOOK) / 2;
-    double  position = (OPEN + CLOSE) / 2; // Start at halfway position
+    HardwareSensors onbot = new HardwareSensors();
+    HardwareOmnibotDrive robot = new HardwareOmnibotDrive();
+    private ElapsedTime runtime = new ElapsedTime();
+    static final double INCREMENT = 0.01;     // amount to slew servo each CYCLE_MS cycle
+    static final double OPEN = 0.6;     // Maximum rotational position
+    static final double CLOSE = 0;     // Minimum rotational position
+    static final double UNHOOK = 0.0, UNHOOK1 = 0.5;     // Maximum rotational position for hooks
+    static final double HOOK = 0.0, HOOK1 = 0.65;     // Minimum rotational position
+    static final double UP = 0, DOWN = 0.45;
+    static int countLevel = 0;
     boolean x2Pressed = false;
     boolean x2Held = false;
+    boolean nest = true;
     boolean y2Pressed = false;
     boolean y2Held = false;
-    boolean togglePressed = false;
-    boolean toggleHeld = false;
+    double position2; // Start at halfway position
+    double position3;
+    double position = 0; // Start at halfway position
+    double position4 = UP;
 
     @Override
     public void init() {
@@ -68,8 +67,9 @@ public class OmniTeleOpDrive extends OpMode {
     private boolean bumpHeld = false;
 
     @Override
-    public void start()
-    {
+    public void start() {
+        onbot.startDenesting();
+        //onbot.denest();
     }
 
     @Override
@@ -103,21 +103,21 @@ public class OmniTeleOpDrive extends OpMode {
         // When bumper is pressed, the speed changes
         bumpPressed = gamepad1.right_bumper;
 
-        if(bumpPressed && !bumpHeld) {
+        if (bumpPressed && !bumpHeld) {
             bumpHeld = true;
             // Check what speed we currently are.
-            if(speedMultiplier == MAX_SPEED) {
+            if (speedMultiplier == MAX_SPEED) {
                 speedMultiplier = lowSpeed;
                 spinMultiplier = lowSpin;
             } else {
                 speedMultiplier = MAX_SPEED;
                 spinMultiplier = MAX_SPIN;
             }
-        }
-        else if( !bumpPressed ) {
+        } else if (!bumpPressed) {
             bumpHeld = false;
         }
-        robot.drive(speedMultiplier * xPower, speedMultiplier * yPower, spinMultiplier * spin, driverAngle);        bumpPressed = gamepad1.right_bumper;
+        robot.drive(speedMultiplier * xPower, speedMultiplier * yPower, spinMultiplier * spin, driverAngle);
+        bumpPressed = gamepad1.right_bumper;
 
 
         telemetry.addData("Y Power: ", yPower);
@@ -127,22 +127,27 @@ public class OmniTeleOpDrive extends OpMode {
         telemetry.addData("Gyro Angle: ", gyroAngle);
         updateTelemetry(telemetry);
 
+        countLevel = 1;
 
         x2Pressed = gamepad2.x;
         // If x2 was pressed, but not held
-        if(x2Pressed && !x2Held) {
+        if (x2Pressed && !x2Held && nest) {
             x2Held = true;
-            int newHeight = onbot.acq2.getCurrentPosition();
+            // So doing stuff with acq2 and acq1 in here might conflict with the activity in onbot.
+            // So for instance it might make the isBusy no longer work.  So might have to integrate
+            // stuff like this into the activities below in onbot.  For now checking the activity state
+            // to make sure it doesn't interfere.
+            if (onbot.denestState == HardwareSensors.DENEST_ACTIVITY.IDLE) {
+                int height = onbot.acq2.getCurrentPosition();
+                height += 1000;
 
-            newHeight += HEIGHT_INCREMENT;
+                onbot.acq2.setTargetPosition(height);
+                onbot.acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-            onbot.acq2.setTargetPosition(newHeight);
-            onbot.acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                onbot.acq2.setPower(1);
 
-            onbot.acq2.setPower(LIFT_SPEED);
-
-
-        } else if(!x2Pressed) {
+            }
+        } else if (!x2Pressed) {
             // This happens if the button is not being pressed at all, which resets that
             // we are holding it so the next time it is pressed it will trigger the action
             // again.
@@ -152,92 +157,91 @@ public class OmniTeleOpDrive extends OpMode {
 
         y2Pressed = gamepad2.y;
 
-        if(y2Pressed && !y2Held) {
-            int newHeight = onbot.acq2.getCurrentPosition();
-            if( newHeight > 300 ) {
-                newHeight -= (LOWER) ;
-
+        if (y2Pressed && !y2Held) {
+            if (onbot.acq2.getCurrentPosition() > 0) {
+                int newHeight = onbot.acq2.getCurrentPosition();
+                newHeight -= 1000;
                 onbot.acq2.setTargetPosition(newHeight);
                 onbot.acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                onbot.acq2.setPower(LIFT_SPEED);
-                onbot.acq2.setTargetPosition(newHeight);
-                onbot.acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                onbot.acq2.setPower((LIFT_SPEED));
-
-            }
-            else if(newHeight <= 300) {
+                onbot.acq2.setPower(1);
+            } else {
+                int newHeight = onbot.acq2.getCurrentPosition();
                 onbot.acq2.setTargetPosition(newHeight);
                 onbot.acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 onbot.acq2.setPower(0);
             }
-        } else if(!y2Pressed) {
+
+
+        } else if (!y2Pressed) {
             y2Held = false;
 
         }
 
-        telemetry.addData("Current Position of Rotation", + onbot.acq1.getCurrentPosition());
+
+        telemetry.addData("Current Position of Extension", +onbot.acq2.getCurrentPosition());
+        telemetry.addData("Current Position of Turn", +onbot.acq1.getCurrentPosition());
+        telemetry.update();
+
+        telemetry.addData("Current Position of Rotation", +onbot.acq1.getCurrentPosition());
         boolean turn = false;
 
-        togglePressed = gamepad2.left_stick_button;
-        // if trigger
-        if(togglePressed && !toggleHeld) {
-            toggleHeld = true;
-            int newSpin = onbot.acq1.getCurrentPosition();
 
-            newSpin += SPIN_INCREMENT;
-
-            onbot.acq1.setTargetPosition(newSpin);
-            onbot.acq1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-            onbot.acq1.setPower(LIFT_SPEED);
-
-
-        } else if(!togglePressed) {
-            // This happens if the button is not being pressed at all, which resets that
-            // we are holding it so the next time it is pressed it will trigger the action
-            // again.
-            togglePressed = false;
-        }
-
-        if(onbot.acq2.getCurrentPosition() > 2000 ) {
+        if (onbot.acq2.getCurrentPosition() > 2000) {
             turn = !turn;
         }
 
 
-        telemetry.addData("Current Position of Extension", + onbot.acq2.getCurrentPosition() );
-        telemetry.addData("Current Position of Turn", + onbot.acq1.getCurrentPosition() );
+        telemetry.addData("Current Position of Extension", +onbot.acq2.getCurrentPosition());
+        telemetry.addData("Current Position of Turn", +onbot.acq1.getCurrentPosition());
         telemetry.update();
 
+
         // Open the acquisition system
-        if(gamepad2.left_bumper  ) {
+        if (gamepad2.left_bumper) {
             position = OPEN;
+            position4 = DOWN;
+
         }
         // secure the block
-        else if(gamepad2.right_bumper ){
-            position = CLOSE;
+        else if (gamepad2.right_bumper) {
+            onbot.startAcquiring();
         }
 
 
-        onbot.arm.setPosition(position);
+        if (onbot.denestState == HardwareSensors.DENEST_ACTIVITY.IDLE) {
+            if (position == OPEN && onbot.acq2.getCurrentPosition() > 0) {
+                onbot.acq2.setTargetPosition(0);
+                onbot.acq2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        // ///////////////////////////////////////////////////////////////////
-        // ////                                                           ////
-        // ////                Foundation Hooks program                   ////
-        // ////                                                           ////
-        // ///////////////////////////////////////////////////////////////////
+                onbot.acq2.setPower(1);
 
-        // Open the hook system
-        if (gamepad2.b) {
-            position2 = 0.0;
-            position3 = 0.5;
+
+                // ///////////////////////////////////////////////////////////////////
+                // ////                                                           ////
+                // ////                Foundation Hooks program                   ////
+                // ////                                                           ////
+                // ///////////////////////////////////////////////////////////////////
+
+                // Open the hook system
+                if (gamepad2.b) {
+                    position2 = 0.0;
+                    position3 = 0.5;
+                }
+                // secure the foundation
+                else if (gamepad2.a) {
+                    position2 = 0.6;
+                    position3 = 0;
+                    robot.gotoRearTarget(0.5, 0.25);
+                }
+
+                onbot.hook1.setPosition(position2);
+                onbot.hook2.setPosition(position3);
+
+                // We have a block of all of our "perform" functions at the end of our loop.
+                // If the activity isn't doing anything, it should just return.
+                onbot.performDenesting();
+                onbot.performAcquire();
+            }
         }
-        // secure the foundation
-        else if(gamepad2.a ){
-            position2 = 0.65;
-            position3 = 0;
-        }
-
-        onbot.hook1.setPosition(position2);
-        onbot.hook2.setPosition(position3);
     }
 }
